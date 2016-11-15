@@ -32,10 +32,13 @@
 
       var buf = new ArrayBuffer(0);
       function onReceive(recvPayload) {
-        v = JSON.parse(recvPayload);
-        console.log('received ', v);
-	if (videos_q.length <= 10) {
-          videos_q.push(v);
+	try {
+          v = JSON.parse(recvPayload);
+	  if (videos_q.length <= 10) {
+	    videos_q.push(v);
+	  }
+	} catch (e) {
+	  console.log("failed to parse the message");
 	}
       }
       function onDOMLoad() {
