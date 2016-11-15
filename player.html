@@ -106,7 +106,7 @@
 
         maybeNextVideo() {
           if (videos_q.length == 0) {
-	    console.log('queue empty, schdeluling a retry');
+	    //console.log('queue empty, schdeluling a retry');
             var that = this;
             setTimeout(function() { that.maybeNextVideo() }, 1000);
             return;
@@ -128,7 +128,7 @@
 
       function onYouTubeIframeAPIReady() {
         // TODO: setup n players.
-        for (var i = 0; i < 1; ++i) {
+        for (var i = 0; i < 4; ++i) {
           var id = 'player' + i;
 	  console.log('setting up player ', id);
           myPlayers[id] = new MyPlayer(id, parseInt(i % 2), parseInt(i / 2));

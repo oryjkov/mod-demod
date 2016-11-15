@@ -9,7 +9,34 @@
     amplitude of 0:<input type="text" id="a_0" value="0.1"><br>
     amplitude of 1:<input type="text" id="a_1" value="0.5"><br>
     samples per bit:<input type="text" id="t_b" value="128"><br>
-    <textarea autofocus="true" autocapitalize="none" autocomplete="off" spellcheck="off" class="form-control" style="resize:none" rows="5" id="inputMessage" value=>{"v":"VI8gdmjEwKc"}</textarea><br>
+    <textarea autofocus="true" autocapitalize="none" autocomplete="off" spellcheck="off" class="form-control" style="resize:none" rows="5" id="inputMessage" value=>{"v":"VI8gdmjEwKc","s":111}</textarea><br>
     <button onclick="play()">play</button><br>
+
+    <script>
+      var fcBox = null;
+      var a_0Box = null;
+      var a_1Box = null;
+      var t_bBox = null;
+      var inputMessageBox = null;
+
+
+      function play() {
+	fc = parseInt(fcBox.value);
+	a_0 = parseFloat(a_0Box.value);
+	a_1 = parseFloat(a_1Box.value);
+	t_b = parseInt(t_bBox.value);
+	playMessage(inputMessageBox.value);
+      }
+      function onDOMLoad() {
+	fcBox = document.getElementById("fc");
+	a_0Box = document.getElementById("a_0");
+	a_1Box = document.getElementById("a_1");
+	t_bBox = document.getElementById("t_b");
+	inputMessageBox = document.getElementById("inputMessage");
+      }
+      document.addEventListener("DOMContentLoaded", onDOMLoad);
+
+    </script>
+
   </body>
 </html>
