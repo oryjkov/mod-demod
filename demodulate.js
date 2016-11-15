@@ -1,18 +1,18 @@
 var messageReceivedCallback = null;
 var drawBufferCallback = null;
 
-function message_to_string(bits) {
+function messageToString(bits) {
   var i = 0;
   var retval = "";
   while (i < bits.length) {
-    var b = bits_to_byte(bits.slice(i, i+8));
+    var b = bitsToByte(bits.slice(i, i+8));
     retval = retval + String.fromCharCode(b);
     i += 8;
   }
   return retval;
 }
 
-function bits_to_byte(bits) {
+function bitsToByte(bits) {
   var retval = bits[7];
   for (var i = 6; i >= 0; i -= 1) {
     retval = (retval << 1) + bits[i];
@@ -35,7 +35,6 @@ window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
 var audioContext = null;
 var scriptNode = null;
-
 
 audioContext = new AudioContext();
 scriptNode = audioContext.createScriptProcessor(16384, 1, 1);
@@ -64,7 +63,7 @@ function processSymbol(aligned_buffer) {
 function eot() {
   console.log(message);
   console.log("read ", message.length, " bits");
-  stringMessage = message_to_string(message);
+  stringMessage = messageToString(message);
   console.log(stringMessage);
   if (messageReceivedCallback) {
     messageReceivedCallback(stringMessage);

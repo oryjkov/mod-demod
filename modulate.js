@@ -8,7 +8,7 @@ var a_0 = 0.1;  // amplitude of 0
 var a_1 = 0.5;  // amplitude of 1
 var t_b = 128;  // samples per bit, bit duration
 
-function byte_to_bits(b) {
+function byteToBits(b) {
   var retval = [];
   for (var i = 0; i < 8; i += 1) {
     retval.push((b >> i) & 1);
@@ -29,7 +29,7 @@ function playMessage(messageString) {
   var message = [];
   // This converts the char_buffer into an array of bits (each bit is 0 or 1).
   char_buffer.forEach(function(element, index, src_array) {
-      message.push.apply(message, byte_to_bits(element)); } );
+      message.push.apply(message, byteToBits(element)); } );
 
   var num_samples = message.length * t_b;
   var audioBuffer = audioContext.createBuffer(1, num_samples, fs);
