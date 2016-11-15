@@ -4,9 +4,9 @@
   </head>
   <body>
     <script type="text/javascript" src="demodulate.js"></script>
-    <canvas id="waveform" width="1024" height="256"></canvas> <br>
-    <canvas id="waveformStart" width="1024" height="256"></canvas> <br>
-    <canvas id="waveformStop" width="1024" height="256" hint="abc"></canvas> <br>
+    <canvas id="waveform0" width="1024" height="256"></canvas> <br>
+    <canvas id="waveform1" width="1024" height="256"></canvas> <br>
+    <canvas id="waveform2" width="1024" height="256" hint="abc"></canvas> <br>
 
     sampling rate:<input type="text" id="fs" value="44100" disabled><br>
     noise threshold:<input type="text" id="noiseThreshold" value=""><br>
@@ -18,6 +18,8 @@
       var noiseThresholdBox = null;
       var bitThresholdBox = null;
       var t_bBox = null;
+      var canvasses = [];
+      var canvasIndex = 0;
 
       function update() {
 	noiseThreshold = parseFloat(noiseThresholdBox.value);
@@ -25,7 +27,6 @@
 	t_b = parseInt(t_bBox.value);
 	aligned_buffer_length = 0;
       }
-
       function onDOMLoad() {
 	noiseThresholdBox = document.getElementById("noiseThreshold");
 	bitThresholdBox = document.getElementById("bitThreshold");
@@ -33,9 +34,39 @@
 	noiseThresholdBox.value = noiseThreshold;
 	bitThresholdBox.value = bitThreshold;
 	t_bBox.value = t_b;
-	console.log("loaded");
+
+	canvasses = [
+	  document.getElementById("waveform0").getContext("2d"),
+	  document.getElementById("waveform1").getContext("2d"),
+	  document.getElementById("waveform2").getContext("2d"),
+	];
+	drawBufferCallback = function(buf) {
+	  updateWaveCanvas(canvasses[canvasIndex], buf);
+	  canvasIndex = (canvasIndex + 1) % canvasses.length;
+	}
       }
       document.addEventListener("DOMContentLoaded", onDOMLoad);
+
+
+      function updateWaveCanvas(waveCanvas, buf) {
+	var canvasLength = 1024;
+	var stepSize = 128;
+	waveCanvas.clearRect(0, 0, 1024, 256);
+	waveCanvas.strokeStyle = "red";
+	waveCanvas.beginPath();
+	for (var i = 0; i <= canvasLength / stepSize ; i += 1) {
+	  waveCanvas.moveTo(i * stepSize, 0);
+	  waveCanvas.lineTo(i * stepSize, 256);
+	}
+	waveCanvas.stroke();
+	waveCanvas.strokeStyle = "black";
+	waveCanvas.beginPath();
+	waveCanvas.moveTo(0, 128 + buf[0] * 128);
+	for (var i = 1; i < canvasLength; i++) {
+	  waveCanvas.lineTo(i, 128 + (buf[i * (buf.length / canvasLength)] * 128));
+	}
+	waveCanvas.stroke();
+      }
     </script>
   </body>
 </html>

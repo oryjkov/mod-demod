@@ -1,4 +1,5 @@
 var messageReceivedCallback = null;
+var drawBufferCallbacl = null;
 
 function message_to_string(bits) {
   var i = 0;
@@ -35,20 +36,12 @@ window.AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext = null;
 var scriptNode = null;
 
-var fullCanvas = null;
-var startCanvas = null;
-var stopCanvas = null;
-var canvasses = [];
 
 audioContext = new AudioContext();
 scriptNode = audioContext.createScriptProcessor(16384, 1, 1);
 scriptNode.onaudioprocess = processBuffer;
 
 window.onload = function() {
-  fullCanvas = document.getElementById("waveform").getContext("2d");
-  startCanvas = document.getElementById("waveformStart").getContext("2d");
-  stopCanvas = document.getElementById("waveformStop").getContext("2d");
-  canvasses = [fullCanvas, startCanvas, stopCanvas];
   record();
 }
 
@@ -94,12 +87,9 @@ function processAligned(buf, startIndex, length) {
 }
 
 var inTransmission = false;
-var canvasIndex = 0;
-var ev = null;
 var bufferCount = 0;
 function processBuffer(audioProcessingEvent) {
   var t0 = performance.now();
-  ev = audioProcessingEvent;
   bufferCount += 1;
   var inputBuffer = audioProcessingEvent.inputBuffer;
   var buf = inputBuffer.getChannelData(0);
@@ -124,15 +114,16 @@ function processBuffer(audioProcessingEvent) {
       inTransmission = false;
     }
   }
-  if (interestingBuffer.length > 0) {
-    updateWaveCanvas(canvasses[canvasIndex], buf);
-    canvasIndex = (canvasIndex + 1) % canvasses.length;
-    console.log("%s: draw canvas %d at time %d, playback time %.2f," +
-                "buffer count: %d, processing took: %.2f ms",
-                interestingBuffer, canvasIndex, ev.timeStamp,
-		ev.playbackTime, bufferCount, (t1 - t0));
+  if (interestingBuffer.length > 0 && drawBufferCallback) {
+    drawBufferCallback(buf);
   }
   var t1 = performance.now();
+  if (interestingBuffer.length > 0) {
+    console.log("%s: draw buffer at time %d, playback time %.2f," +
+                "buffer count: %d, processing took: %.2f ms",
+                interestingBuffer, audioProcessingEvent.timeStamp,
+		audioProcessingEvent.playbackTime, bufferCount, (t1 - t0));
+  }
   if (t1 - t0 > buf.duration) {
     alert("Event processing took longer than the buffer length.");
   }
@@ -181,24 +172,4 @@ function gotStream(stream) {
 
   micSource.connect(scriptNode);
   scriptNode.connect(dummy_gain);
-}
-
-function updateWaveCanvas(waveCanvas, buf) {
-  var canvasLength = 1024;
-  var stepSize = 128;
-  waveCanvas.clearRect(0, 0, 1024, 256);
-  waveCanvas.strokeStyle = "red";
-  waveCanvas.beginPath();
-  for (var i = 0; i <= canvasLength / stepSize ; i += 1) {
-    waveCanvas.moveTo(i * stepSize, 0);
-    waveCanvas.lineTo(i * stepSize, 256);
-  }
-  waveCanvas.stroke();
-  waveCanvas.strokeStyle = "black";
-  waveCanvas.beginPath();
-  waveCanvas.moveTo(0, 128 + buf[0] * 128);
-  for (var i = 1; i < canvasLength; i++) {
-    waveCanvas.lineTo(i, 128 + (buf[i * (buf.length / canvasLength)] * 128));
-  }
-  waveCanvas.stroke();
 }
