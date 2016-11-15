@@ -64,9 +64,10 @@ function processSymbol(aligned_buffer) {
 function eot() {
   console.log(message);
   console.log("read ", message.length, " bits");
-  console.log(message_to_string(message));
+  stringMessage = message_to_string(message);
+  console.log(stringMessage);
   if (messageReceivedCallback) {
-    messageReceivedCallback(message);
+    messageReceivedCallback(stringMessage);
   }
   aligned_buffer_length = 0;
   message = [];
@@ -146,7 +147,6 @@ function getUserMedia(dictionary, callback) {
 }
 
 function record() {
-  update();
   getUserMedia({
     "audio": {
       "mandatory": {
