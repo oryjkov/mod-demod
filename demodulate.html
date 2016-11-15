@@ -8,8 +8,32 @@
     <canvas id="waveform" width="512" height="256"></canvas> <br>
 
     sampling rate:<input type="text" id="fs" value="44100" disabled><br>
-    noise threshold:<input type="text" id="noiseThreshold" value="0.01"><br>
-    bit threshold:<input type="text" id="bitThreshold" value="0.09"><br>
-    samples per bit:<input type="text" id="t_b" value="128"><br>
+    noise threshold:<input type="text" id="noiseThreshold" value=""><br>
+    bit threshold:<input type="text" id="bitThreshold" value=""><br>
+    samples per bit:<input type="text" id="t_b" value=""><br>
+
+    <script>
+      var noiseThresholdBox = null;
+      var bitThresholdBox = null;
+      var t_bBox = null;
+
+      function update() {
+	noiseThreshold = parseFloat(noiseThresholdBox.value);
+	bitThreshold = parseFloat(bitThresholdBox.value);
+	t_b = parseInt(t_bBox.value);
+	aligned_buffer_length = 0;
+      }
+
+      function onDOMLoad() {
+	noiseThresholdBox = document.getElementById("noiseThreshold");
+	bitThresholdBox = document.getElementById("bitThreshold");
+	t_bBox = document.getElementById("t_b");
+	noiseThresholdBox.value = noiseThreshold;
+	bitThresholdBox.value = bitThreshold;
+	t_bBox.value = t_b;
+	console.log("loaded");
+      }
+      document.addEventListener("DOMContentLoaded", onDOMLoad);
+    </script>
   </body>
 </html>

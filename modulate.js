@@ -66,7 +66,7 @@ function play() {
     generate_bit(audioBuffer.getChannelData(0), bit_index * t_b,
                  message[bit_index] == 1);
   }
-  //console.log(message);
+  console.log(message);
   //console.log("sending ", message.length, " bits");
 
   var bufferSource = audioContext.createBufferSource();

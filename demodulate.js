@@ -1,9 +1,10 @@
+var messageReceivedCallback = null;
+
 function message_to_string(bits) {
   var i = 0;
   var retval = "";
   while (i < bits.length) {
     var b = bits_to_byte(bits.slice(i, i+8));
-    //console.log("byte: ", b);
     retval = retval + String.fromCharCode(b);
     i += 8;
   }
@@ -24,9 +25,6 @@ window.AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext = null;
 var DEBUGCANVAS = null;
 var scriptNode = null;
-var noiseThresholdBox = null;
-var bitThresholdBox = null;
-var t_bBox = null;
 
 audioContext = new AudioContext();
 scriptNode = audioContext.createScriptProcessor(16384, 1, 1);
@@ -36,8 +34,6 @@ window.onload = function() {
   DEBUGCANVAS = document.getElementById("waveform");
   if (DEBUGCANVAS) {
     waveCanvas = DEBUGCANVAS.getContext("2d");
-    waveCanvas.strokeStyle = "black";
-    waveCanvas.lineWidth = 1;
   }
   record();
 }
@@ -47,25 +43,26 @@ var t_b = 128;
 var noiseThreshold = 0.01;
 var bitThreshold = 0.09;
 
-var aligned_buffer = new Float32Array(t_b);
+var aligned_buffer = new Float32Array(65536);
 var aligned_buffer_length = 0;
 
 var message = [];
 function processSymbol(aligned_buffer) {
   var pos_avg = aligned_buffer.reduce(
-    function(a, b) { return a + Math.max(b, 0); }) / aligned_buffer.length;
+    function(a, b) { return a + Math.max(b, 0); }) / t_b;
+  //console.log(pos_avg);
   message.push(pos_avg < bitThreshold ? 0 : 1);
 }
 
 // End of transmission.
 function eot() {
-  if (message.length > 0) {
-    //console.log(message);
-    //console.log("read ", message.length, " bits");
-    console.log(message_to_string(message));
+  console.log(message);
+  console.log("read ", message.length, " bits");
+  console.log(message_to_string(message));
+  if (messageReceivedCallback) {
+    messageReceivedCallback(message);
   }
   aligned_buffer_length = 0;
-  sym = 0;
   message = [];
 }
 
@@ -80,6 +77,7 @@ function processAligned(new_data) {
   }
 }
 
+var inTransmission = false;
 function processBuffer(audioProcessingEvent) {
   var inputBuffer = audioProcessingEvent.inputBuffer;
   var buf = inputBuffer.getChannelData(0);
@@ -96,21 +94,28 @@ function processBuffer(audioProcessingEvent) {
   var window_size = 16;
   for (var i = 0; i < buf.length / window_size; i+=1) {
     var pos_avg = window_pos_sum(buf, i * window_size, window_size) / window_size;
-    //console.log("pos avg: ", pos_avg);
     if (pos_avg > noiseThreshold) {
       //console.log("have data");
       processAligned(buf.slice(i * window_size, (i+1) * window_size));
-      if (message.length == 0) {
-        updateWaveCanvas(buf);
+      if (!inTransmission) {
+        updateWaveCanvas(buf.slice(i * window_size, (i+1) * window_size));
+        //updateWaveCanvas(buf);
+        console.log("pos avg that started transmission: ", pos_avg);
       }
+      inTransmission = true;
     } else {
-      eot();
+      if (inTransmission) {
+        //updateWaveCanvas(buf.slice(i * window_size, (i+1) * window_size));
+        console.log("pos avg that stopped transmission: ", pos_avg);
+        eot();
+      }
+      inTransmission = false;
     }
   }
 }
 
 function error() {
-    alert('Stream generation failed.');
+  alert('Stream generation failed.');
 }
 
 function getUserMedia(dictionary, callback) {
@@ -123,14 +128,6 @@ function getUserMedia(dictionary, callback) {
   } catch (e) {
     alert('getUserMedia threw exception :' + e);
   }
-}
-
-function update() {
-  noiseThreshold = parseFloat(noiseThresholdBox.value);
-  bitThreshold = parseFloat(bitThresholdBox.value);
-  t_b = parseInt(t_bBox.value);
-  eot();
-  aligned_buffer = new Float32Array(t_b);
 }
 
 function record() {
@@ -162,7 +159,6 @@ function gotStream(stream) {
   scriptNode.connect(dummy_gain);
 }
 
-var rafID = null;
 function updateWaveCanvas(buf) {
   if (DEBUGCANVAS) {  // This draws the current waveform, useful for debugging
     waveCanvas.clearRect(0, 0, 512, 256);
@@ -188,11 +184,3 @@ function updateWaveCanvas(buf) {
     waveCanvas.stroke();
   }
 }
-
-function onDOMLoad() {
-  noiseThresholdBox = document.getElementById("noiseThreshold");
-  bitThresholdBox = document.getElementById("bitThreshold");
-  t_bBox = document.getElementById("t_b");
-  console.log("loaded");
-}
-document.addEventListener("DOMContentLoaded", onDOMLoad);
