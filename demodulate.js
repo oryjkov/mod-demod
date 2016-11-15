@@ -126,7 +126,7 @@ function processBuffer(audioProcessingEvent) {
     console.log("%s: draw buffer at time %d, playback time %.2f," +
                 "buffer count: %d, processing took: %.2f ms",
                 interestingBuffer, audioProcessingEvent.timeStamp,
-		audioProcessingEvent.playbackTime, bufferCount, (t1 - t0));
+                audioProcessingEvent.playbackTime, bufferCount, (t1 - t0));
   }
   if (t1 - t0 > buf.duration) {
     alert("Event processing took longer than the input buffer length.");
@@ -139,7 +139,7 @@ function error() {
 
 function getUserMedia(dictionary, callback) {
   try {
-    navigator.getUserMedia = 
+    navigator.getUserMedia =
         navigator.getUserMedia ||
         navigator.webkitGetUserMedia ||
         navigator.mozGetUserMedia;
@@ -153,10 +153,10 @@ function record() {
   getUserMedia({
     "audio": {
       "mandatory": {
-	"googEchoCancellation": "false",
-	"googAutoGainControl": "false",
-	"googNoiseSuppression": "false",
-	"googHighpassFilter": "false"
+        "googEchoCancellation": "false",
+        "googAutoGainControl": "false",
+        "googNoiseSuppression": "false",
+        "googHighpassFilter": "false"
       },
       "optional": []
     },

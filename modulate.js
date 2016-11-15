@@ -44,10 +44,10 @@ function transmitMessage(messageString) {
       var amplitude =
         one ? transmitParams.bitOneAmplitude : transmitParams.bitZeroAmplitude;
       buffer[i] = amplitude
-	* Math.cos(
-	    (2 * Math.PI * transmitParams.carrierWaveFrequency * i)
-	    / transmitParams.samplingFrequency
-	  );
+        * Math.cos(
+            (2 * Math.PI * transmitParams.carrierWaveFrequency * i)
+            / transmitParams.samplingFrequency
+          );
     }
   }
   for(var bit_index = 0; bit_index < message.length; bit_index += 1) {
