@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <script type="text/javascript" src="demodulate.js"></script>
+    <button onclick="update()">update</button>
+    <canvas id="waveform" width="512" height="256"></canvas> <br>
+
+    sampling rate:<input type="text" id="fs" value="44100" disabled><br>
+    noise threshold:<input type="text" id="noiseThreshold" value="0.01"><br>
+    bit threshold:<input type="text" id="bitThreshold" value="0.09"><br>
+    samples per bit:<input type="text" id="t_b" value="128"><br>
+  </body>
+</html>
