@@ -4,13 +4,15 @@
   </head>
   <body>
     <script type="text/javascript" src="demodulate.js"></script>
-    <button onclick="update()">update</button>
-    <canvas id="waveform" width="512" height="256"></canvas> <br>
+    <canvas id="waveform" width="1024" height="256"></canvas> <br>
+    <canvas id="waveformStart" width="1024" height="256"></canvas> <br>
+    <canvas id="waveformStop" width="1024" height="256" hint="abc"></canvas> <br>
 
     sampling rate:<input type="text" id="fs" value="44100" disabled><br>
     noise threshold:<input type="text" id="noiseThreshold" value=""><br>
     bit threshold:<input type="text" id="bitThreshold" value=""><br>
     samples per bit:<input type="text" id="t_b" value=""><br>
+    <button onclick="update()">update</button>
 
     <script>
       var noiseThresholdBox = null;
