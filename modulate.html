@@ -19,13 +19,12 @@
       var t_bBox = null;
       var inputMessageBox = null;
 
-
       function play() {
-	fc = parseInt(fcBox.value);
-	a_0 = parseFloat(a_0Box.value);
-	a_1 = parseFloat(a_1Box.value);
-	t_b = parseInt(t_bBox.value);
-	playMessage(inputMessageBox.value);
+	transmitParams.carrierWaveFrequency = parseInt(fcBox.value);
+	transmitParams.bitZeroAmplitude = parseFloat(a_0Box.value);
+	transmitParams.bitOneAmplitude = parseFloat(a_1Box.value);
+	transmitParams.samplesPerBit = parseInt(t_bBox.value);
+	transmitMessage(inputMessageBox.value);
       }
       function onDOMLoad() {
 	fcBox = document.getElementById("fc");
