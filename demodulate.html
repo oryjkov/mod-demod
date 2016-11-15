@@ -10,30 +10,29 @@
 
     sampling rate:<input type="text" id="fs" value="44100" disabled><br>
     noise threshold:<input type="text" id="noiseThreshold" value=""><br>
-    bit threshold:<input type="text" id="bitThreshold" value=""><br>
-    samples per bit:<input type="text" id="t_b" value=""><br>
+    bit threshold:<input type="text" id="zeroOneThreshold" value=""><br>
+    samples per bit:<input type="text" id="samplesPerBit" value=""><br>
     <button onclick="update()">update</button>
 
     <script>
       var noiseThresholdBox = null;
-      var bitThresholdBox = null;
-      var t_bBox = null;
+      var zeroOneThresholdBox = null;
+      var samplesPerBitBox = null;
       var canvasses = [];
       var canvasIndex = 0;
 
       function update() {
-	noiseThreshold = parseFloat(noiseThresholdBox.value);
-	bitThreshold = parseFloat(bitThresholdBox.value);
-	t_b = parseInt(t_bBox.value);
-	aligned_buffer_length = 0;
+	demodulateParams.noiseThreshold = parseFloat(noiseThresholdBox.value);
+	demodulateParams.zeroOneThreshold = parseFloat(zeroOneThresholdBox.value);
+	demodulateParams.samplesPerBig = parseInt(samplesPerBitBox.value);
       }
       function onDOMLoad() {
 	noiseThresholdBox = document.getElementById("noiseThreshold");
-	bitThresholdBox = document.getElementById("bitThreshold");
-	t_bBox = document.getElementById("t_b");
-	noiseThresholdBox.value = noiseThreshold;
-	bitThresholdBox.value = bitThreshold;
-	t_bBox.value = t_b;
+	zeroOneThresholdBox = document.getElementById("zeroOneThreshold");
+	samplesPerBitBox = document.getElementById("samplesPerBit");
+	noiseThresholdBox.value = demodulateParams.noiseThreshold;
+	zeroOneThresholdBox.value = demodulateParams.zeroOneThreshold;
+	samplesPerBitBox.value = demodulateParams.samplesPerBit;
 
 	canvasses = [
 	  document.getElementById("waveform0").getContext("2d"),
@@ -44,6 +43,7 @@
 	  updateWaveCanvas(canvasses[canvasIndex], buf);
 	  canvasIndex = (canvasIndex + 1) % canvasses.length;
 	}
+	record();
       }
       document.addEventListener("DOMContentLoaded", onDOMLoad);
 

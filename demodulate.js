@@ -1,6 +1,18 @@
+// Called whenever a new message is received. Message is the only argument.
 var messageReceivedCallback = null;
+// Called to draw the buffer whenever an "interesting" buffer appears.
+// Buffer is the only argument.
 var drawBufferCallback = null;
 
+var demodulateParams = {
+  samplesPerBit: 128,
+  noiseThreshold: 0.01,
+  zeroOneThreshold: 0.09,
+  readWindowSize: 64,  // Size of chunks read from the buffer (in samples).
+  inputBufferSize: 16384,  // Size of the input buffer (in samples). 
+};
+
+// Converts an array of 0/1 bits to a string.
 function messageToString(bits) {
   var i = 0;
   var retval = "";
@@ -12,96 +24,88 @@ function messageToString(bits) {
   return retval;
 }
 
+// Converts an array of 8 0/1 bits into a byte.
 function bitsToByte(bits) {
   var retval = bits[7];
   for (var i = 6; i >= 0; i -= 1) {
     retval = (retval << 1) + bits[i];
-    //console.log("bit: ", bits[i], ", retval: ", retval);
   }
   return retval;
 }
 
 // Calculates the sum of positive elements in the array, starting from
-// start_index and going till end_index.
-function window_pos_sum(array, start_index, end_index) {
+// startIndex and going till endIndex.
+function arrayWindowPositiveAverage(array, startIndex, endIndex) {
   var sum = 0.0;
-  for (var i = start_index; i < end_index; i += 1) {
+  if (endIndex == startIndex) {
+    return 0;
+  }
+  for (var i = startIndex; i < endIndex; i += 1) {
     sum += Math.max(array[i], 0);
   }
-  return sum;
+  return sum / (endIndex - startIndex);
 }
 
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
-
 var audioContext = null;
 var scriptNode = null;
 
 audioContext = new AudioContext();
-scriptNode = audioContext.createScriptProcessor(16384, 1, 1);
+scriptNode = audioContext.createScriptProcessor(
+  demodulateParams.inputBufferSize, 1, 1);
 scriptNode.onaudioprocess = processBuffer;
 
-window.onload = function() {
-  record();
-}
-
-var t_b = 128;
-// empirical..
-var noiseThreshold = 0.01;
-var bitThreshold = 0.09;
-
-var aligned_buffer = new Float32Array(65536);
-var aligned_buffer_length = 0;
-
+var alignedBuffer = new Float32Array(65536);
+var alignedBufferLength = 0;
 var message = [];
-function processSymbol(aligned_buffer) {
-  var pos_avg = window_pos_sum(aligned_buffer, 0, t_b) / t_b;
-  //console.log(pos_avg);
-  message.push(pos_avg < bitThreshold ? 0 : 1);
+var inTransmission = false;
+var bufferCount = 0;
+
+function processSymbol(alignedBuffer) {
+  var posAvg = arrayWindowPositiveAverage(alignedBuffer, 0,
+                                           demodulateParams.samplesPerBit);
+  message.push(posAvg < demodulateParams.zeroOneThreshold ? 0 : 1);
 }
 
 // End of transmission.
-function eot() {
-  console.log(message);
-  console.log("read ", message.length, " bits");
+function endOfTransmission() {
+  console.log("read %d bits", message.length);
+  console.log("raw message:", message);
   stringMessage = messageToString(message);
   console.log(stringMessage);
   if (messageReceivedCallback) {
     messageReceivedCallback(stringMessage);
   }
-  aligned_buffer_length = 0;
+  alignedBufferLength = 0;
   message = [];
 }
 
 function processAligned(buf, startIndex, length) {
-  //aligned_buffer.set(new_data, aligned_buffer_length);
   for (var i = 0; i < length; i +=1 ) {
-    aligned_buffer[aligned_buffer_length + i] = buf[startIndex + i];
+    alignedBuffer[alignedBufferLength + i] = buf[startIndex + i];
   }
-  aligned_buffer_length += length;
+  alignedBufferLength += length;
 
-  //console.log("aligned length: ", aligned_buffer_length);
-  if (aligned_buffer_length >= t_b) {
-    processSymbol(aligned_buffer);
-    aligned_buffer_length = 0;
+  if (alignedBufferLength >= demodulateParams.samplesPerBit) {
+    processSymbol(alignedBuffer);
+    alignedBufferLength = 0;
   }
 }
 
-var inTransmission = false;
-var bufferCount = 0;
 function processBuffer(audioProcessingEvent) {
   var t0 = performance.now();
   bufferCount += 1;
   var inputBuffer = audioProcessingEvent.inputBuffer;
   var buf = inputBuffer.getChannelData(0);
 
-  //console.log("got bytes: ", buf.length);
-  // Size of chunks to append to the buffer.
-  var window_size = 16;
   var interestingBuffer = "";
-  for (var i = 0; i < buf.length / window_size; i+=1) {
-    var pos_avg = window_pos_sum(buf, i * window_size, (i + 1) * window_size) / window_size;
-    if (pos_avg > noiseThreshold) {
-      processAligned(buf, i * window_size, window_size);
+  for (var i = 0; i < buf.length / demodulateParams.readWindowSize; i+=1) {
+    var posAvg = arrayWindowPositiveAverage(
+      buf, i * demodulateParams.readWindowSize,
+      (i + 1) * demodulateParams.readWindowSize);
+    if (posAvg > demodulateParams.noiseThreshold) {
+      processAligned(buf, i * demodulateParams.readWindowSize,
+                     demodulateParams.readWindowSize);
       if (!inTransmission) {
         interestingBuffer += "starting buffer";
       }
@@ -109,7 +113,7 @@ function processBuffer(audioProcessingEvent) {
     } else {
       if (inTransmission) {
         interestingBuffer += " ending buffer";
-        eot();
+        endOfTransmission();
       }
       inTransmission = false;
     }
@@ -125,7 +129,7 @@ function processBuffer(audioProcessingEvent) {
 		audioProcessingEvent.playbackTime, bufferCount, (t1 - t0));
   }
   if (t1 - t0 > buf.duration) {
-    alert("Event processing took longer than the buffer length.");
+    alert("Event processing took longer than the input buffer length.");
   }
 }
 
