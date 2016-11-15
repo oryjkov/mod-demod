@@ -43,6 +43,7 @@
       }
       function onDOMLoad() {
 	messageReceivedCallback = onReceive;
+	record();
       }
 
       document.addEventListener("DOMContentLoaded", onDOMLoad);
