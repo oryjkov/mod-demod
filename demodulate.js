@@ -1,5 +1,5 @@
 var messageReceivedCallback = null;
-var drawBufferCallbacl = null;
+var drawBufferCallback = null;
 
 function message_to_string(bits) {
   var i = 0;
