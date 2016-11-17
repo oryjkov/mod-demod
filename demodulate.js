@@ -64,8 +64,12 @@ var bufferCount = 0;
 
 function processSymbol(alignedBuffer) {
   var posAvg = arrayWindowPositiveAverage(alignedBuffer, 0,
-                                           demodulateParams.samplesPerBit);
-  message.push(posAvg < demodulateParams.zeroOneThreshold ? 0 : 1);
+                                          demodulateParams.samplesPerBit);
+  var tmp = alignedBuffer.slice(0, demodulateParams.samplesPerBit);
+  tmp = tmp.map(Math.abs());
+  tmp = tmp.sort();
+  var tile = tmp[round(demodulateParams.samplesPerBit * 0.9)];
+  message.push(tile < demodulateParams.zeroOneThreshold ? 0 : 1);
 }
 
 // End of transmission.
