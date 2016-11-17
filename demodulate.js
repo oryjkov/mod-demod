@@ -5,7 +5,7 @@ var messageReceivedCallback = null;
 var drawBufferCallback = null;
 
 var demodulateParams = {
-  carrierWaveFrequency: 10000;
+  carrierWaveFrequency: 10000,
   samplesPerBit: 128,
   noiseThreshold: 0.03,
   zeroOneThreshold: 0.09,
@@ -170,7 +170,7 @@ function gotStream(stream) {
   micSource = audioContext.createMediaStreamSource(stream);
   bandFilter = audioContext.createBiquadFilter();
 
-  bandFilter.type = "band"
+  bandFilter.type = "bandpass"
   bandFilter.frequency = demodulateParams.carrierWaveFrequency;
   bandFilter.Q = 1000;
 
