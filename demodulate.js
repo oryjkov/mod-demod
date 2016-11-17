@@ -5,8 +5,9 @@ var messageReceivedCallback = null;
 var drawBufferCallback = null;
 
 var demodulateParams = {
+  carrierWaveFrequency: 10000;
   samplesPerBit: 128,
-  noiseThreshold: 0.01,
+  noiseThreshold: 0.03,
   zeroOneThreshold: 0.09,
   readWindowSize: 64,  // Size of chunks read from the buffer (in samples).
   inputBufferSize: 16384,  // Size of the input buffer (in samples). 
@@ -167,12 +168,18 @@ function gotStream(stream) {
   // Create an AudioNode from the audio in stream and connect it to the
   // destination.
   micSource = audioContext.createMediaStreamSource(stream);
+  bandFilter = audioContext.createBiquadFilter();
+
+  bandFilter.type = "band"
+  bandFilter.frequency = demodulateParams.carrierWaveFrequency;
+  bandFilter.Q = 1000;
 
   // Workaround for
   // https://stackoverflow.com/questions/19482155/do-webaudio-scriptprocessornodes-require-an-output-to-be-connected
   var dummy_gain = audioContext.createGain();
   dummy_gain.connect(audioContext.destination);
 
-  micSource.connect(scriptNode);
+  micSource.connect(bandFilter);
+  bandFilter.connect(scriptNode);
   scriptNode.connect(dummy_gain);
 }
