@@ -27,6 +27,8 @@
 	demodulateParams.samplesPerBig = parseInt(samplesPerBitBox.value);
       }
       function onDOMLoad() {
+	fsBox = document.getElementById("fs");
+	fsBox.value = audioContext.sampleRate;
 	noiseThresholdBox = document.getElementById("noiseThreshold");
 	zeroOneThresholdBox = document.getElementById("zeroOneThreshold");
 	samplesPerBitBox = document.getElementById("samplesPerBit");
