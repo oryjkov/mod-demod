@@ -4,7 +4,7 @@
   </head>
   <body>
     <script type="text/javascript" src="modulate.js"></script>
-    sampling rate:<input type="text" id="fs" value="44100" disabled><br>
+    sampling rate:<input type="text" id="fs" value="44100"><br>
     carrier wave frequency:<input type="text" id="fc" value="10000"><br>
     amplitude of 0:<input type="text" id="a_0" value="0.1"><br>
     amplitude of 1:<input type="text" id="a_1" value="0.5"><br>
@@ -13,6 +13,7 @@
     <button onclick="play()">play</button><br>
 
     <script>
+      var fsBox = null;
       var fcBox = null;
       var a_0Box = null;
       var a_1Box = null;
@@ -20,6 +21,7 @@
       var inputMessageBox = null;
 
       function play() {
+	transmitParams.samplingFrequency = parseInt(fsBox.value);
 	transmitParams.carrierWaveFrequency = parseInt(fcBox.value);
 	transmitParams.bitZeroAmplitude = parseFloat(a_0Box.value);
 	transmitParams.bitOneAmplitude = parseFloat(a_1Box.value);
@@ -27,6 +29,7 @@
 	transmitMessage(inputMessageBox.value);
       }
       function onDOMLoad() {
+	fsBox = document.getElementById("fs");
 	fcBox = document.getElementById("fc");
 	a_0Box = document.getElementById("a_0");
 	a_1Box = document.getElementById("a_1");
