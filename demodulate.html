@@ -6,9 +6,10 @@
     <script type="text/javascript" src="demodulate.js"></script>
     <canvas id="waveform0" width="1024" height="256"></canvas> <br>
     <canvas id="waveform1" width="1024" height="256"></canvas> <br>
-    <canvas id="waveform2" width="1024" height="256" hint="abc"></canvas> <br>
+    <canvas id="waveform2" width="1024" height="256"></canvas> <br>
 
     sampling rate:<input type="text" id="fs" value="44100" disabled><br>
+    carrier wave frequency:<input type="text" id="fc" value="loading"><br>
     noise threshold:<input type="text" id="noiseThreshold" value=""><br>
     bit threshold:<input type="text" id="zeroOneThreshold" value=""><br>
     samples per bit:<input type="text" id="samplesPerBit" value=""><br>
@@ -18,17 +19,23 @@
       var noiseThresholdBox = null;
       var zeroOneThresholdBox = null;
       var samplesPerBitBox = null;
+      var fcBox = null;
       var canvasses = [];
       var canvasIndex = 0;
 
       function update() {
 	demodulateParams.noiseThreshold = parseFloat(noiseThresholdBox.value);
 	demodulateParams.zeroOneThreshold = parseFloat(zeroOneThresholdBox.value);
-	demodulateParams.samplesPerBig = parseInt(samplesPerBitBox.value);
+	demodulateParams.samplesPerBit = parseInt(samplesPerBitBox.value);
+        demodulateParams.carrierWaveFrequency = parseInt(fcBox.value);
       }
       function onDOMLoad() {
+	fcBox = document.getElementById("fc");
+        fcBox.value = demodulateParams.carrierWaveFrequency;
+
 	fsBox = document.getElementById("fs");
 	fsBox.value = audioContext.sampleRate;
+
 	noiseThresholdBox = document.getElementById("noiseThreshold");
 	zeroOneThresholdBox = document.getElementById("zeroOneThreshold");
 	samplesPerBitBox = document.getElementById("samplesPerBit");

@@ -5,9 +5,9 @@ var messageReceivedCallback = null;
 var drawBufferCallback = null;
 
 var demodulateParams = {
-  carrierWaveFrequency: 10000,
+  carrierWaveFrequency: 1000,
   samplesPerBit: 128,
-  noiseThreshold: 0.03,
+  noiseThreshold: 0.02,
   zeroOneThreshold: 0.09,
   readWindowSize: 64,  // Size of chunks read from the buffer (in samples).
   inputBufferSize: 16384,  // Size of the input buffer (in samples). 
@@ -181,5 +181,6 @@ function gotStream(stream) {
 
   micSource.connect(bandFilter);
   bandFilter.connect(scriptNode);
+  //micSource.connect(scriptNode);
   scriptNode.connect(dummy_gain);
 }
