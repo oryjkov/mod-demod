@@ -10,11 +10,10 @@
     <canvas id="waveform2" width="1200" height="256"></canvas> <br>
 
     sampling rate:<input type="text" id="fs" value="44100" disabled><br>
-    carrier wave frequency:<input type="text" id="fc" value="loading"><br>
-    noise threshold:<input type="text" id="noiseThreshold" value=""><br>
-    bit threshold:<input type="text" id="zeroOneThreshold" value=""><br>
-    samples per bit:<input type="text" id="samplesPerBit" value=""><br>
-    <button onclick="update()">update</button>
+    noise threshold:<input type="text" id="noiseThreshold" value="" oninput="update()"><br>
+    bit threshold:<input type="text" id="zeroOneThreshold" value="" oninput="update()"><br>
+    samples per bit:<input type="text" id="samplesPerBit" value="" oninput="update()"><br>
+    <a href="player.html" id="playerLink">player</a>
 
     <script>
       var noiseThresholdBox = null;
@@ -25,15 +24,33 @@
       var canvasIndex = 3;
       function getCanvas(index) { return canvasses[index % 3]; }
 
+      function updatePlayerLink() {
+        var ps = "";
+        for (var param in demodulateParams) {
+          if (demodulateParams.hasOwnProperty(param)) {
+            if (ps.length > 0) {
+              ps = ps + "&";
+            }
+            ps += param + "=" + demodulateParams[param];
+          }
+        }
+        console.log(ps);
+        if (ps.length > 0) {
+          document.getElementById("playerLink").href = "player.html?" + ps;
+        }
+      }
+
       function update() {
 	demodulateParams.noiseThreshold = parseFloat(noiseThresholdBox.value);
 	demodulateParams.zeroOneThreshold = parseFloat(zeroOneThresholdBox.value);
 	demodulateParams.samplesPerBit = parseInt(samplesPerBitBox.value);
-        demodulateParams.carrierWaveFrequency = parseInt(fcBox.value);
+        //demodulateParams.carrierWaveFrequency = parseInt(fcBox.value);
+        updatePlayerLink();
       }
+
       function onDOMLoad() {
 	fcBox = document.getElementById("fc");
-        fcBox.value = demodulateParams.carrierWaveFrequency;
+        //fcBox.value = demodulateParams.carrierWaveFrequency;
 
 	fsBox = document.getElementById("fs");
 	fsBox.value = audioContext.sampleRate;
@@ -55,6 +72,7 @@
                            buf, highlights);
 	  canvasIndex += 1;
 	}
+        updatePlayerLink();
 	record();
       }
       document.addEventListener("DOMContentLoaded", onDOMLoad);
