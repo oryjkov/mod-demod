@@ -6,7 +6,7 @@ var drawBufferCallback = null;
 
 var demodulateParams = {
   carrierWaveFrequency: 1000,
-  samplesPerBit: 128,
+  samplesPerBit: 256,
   noiseThreshold: 0.02,
   zeroOneThreshold: 0.09,
   readWindowSize: 64,  // Size of chunks read from the buffer (in samples).
@@ -66,9 +66,9 @@ function processSymbol(alignedBuffer) {
   var posAvg = arrayWindowPositiveAverage(alignedBuffer, 0,
                                           demodulateParams.samplesPerBit);
   var tmp = alignedBuffer.slice(0, demodulateParams.samplesPerBit);
-  tmp = tmp.map(Math.abs());
+  tmp = tmp.map(Math.abs);
   tmp = tmp.sort();
-  var tile = tmp[round(demodulateParams.samplesPerBit * 0.9)];
+  var tile = tmp[Math.round(demodulateParams.samplesPerBit * 0.9)];
   message.push(tile < demodulateParams.zeroOneThreshold ? 0 : 1);
 }
 
@@ -86,7 +86,7 @@ function endOfTransmission() {
 }
 
 function processAligned(buf, startIndex, length) {
-  for (var i = 0; i < length; i +=1 ) {
+  for (var i = 0; i < length; i ++ ) {
     alignedBuffer[alignedBufferLength + i] = buf[startIndex + i];
   }
   alignedBufferLength += length;
@@ -103,12 +103,15 @@ function processBuffer(audioProcessingEvent) {
   var inputBuffer = audioProcessingEvent.inputBuffer;
   var buf = inputBuffer.getChannelData(0);
 
+  var highlights = [];
   var interestingBuffer = "";
-  for (var i = 0; i < buf.length / demodulateParams.readWindowSize; i+=1) {
+  for (var i = 0; i < buf.length / demodulateParams.readWindowSize; i++) {
     var posAvg = arrayWindowPositiveAverage(
       buf, i * demodulateParams.readWindowSize,
       (i + 1) * demodulateParams.readWindowSize);
     if (posAvg > demodulateParams.noiseThreshold) {
+      highlights.push([i * demodulateParams.readWindowSize,
+                       demodulateParams.readWindowSize]);
       processAligned(buf, i * demodulateParams.readWindowSize,
                      demodulateParams.readWindowSize);
       if (!inTransmission) {
@@ -124,7 +127,7 @@ function processBuffer(audioProcessingEvent) {
     }
   }
   if (interestingBuffer.length > 0 && drawBufferCallback) {
-    drawBufferCallback(buf);
+    drawBufferCallback(buf, highlights);
   }
   var t1 = performance.now();
   if (interestingBuffer.length > 0) {
@@ -183,8 +186,8 @@ function gotStream(stream) {
   var dummy_gain = audioContext.createGain();
   dummy_gain.connect(audioContext.destination);
 
-  micSource.connect(bandFilter);
-  bandFilter.connect(scriptNode);
-  //micSource.connect(scriptNode);
+  //micSource.connect(bandFilter);
+  //bandFilter.connect(scriptNode);
+  micSource.connect(scriptNode);
   scriptNode.connect(dummy_gain);
 }

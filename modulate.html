@@ -5,10 +5,10 @@
   <body>
     <script type="text/javascript" src="modulate.js"></script>
     sampling rate:<input type="text" id="fs" value="44100"><br>
-    carrier wave frequency:<input type="text" id="fc" value="10000"><br>
-    amplitude of 0:<input type="text" id="a_0" value="0.1"><br>
-    amplitude of 1:<input type="text" id="a_1" value="0.5"><br>
-    samples per bit:<input type="text" id="t_b" value="128"><br>
+    carrier wave frequency:<input type="text" id="fc" value=""><br>
+    amplitude of 0:<input type="text" id="a_0" value=""><br>
+    amplitude of 1:<input type="text" id="a_1" value=""><br>
+    samples per bit:<input type="text" id="t_b" value=""><br>
     <textarea autofocus="true" autocapitalize="none" autocomplete="off" spellcheck="off" class="form-control" style="resize:none" rows="5" id="inputMessage" value=>{"v":"VI8gdmjEwKc","s":111}</textarea><br>
     <button onclick="play()">play</button><br>
 
@@ -34,6 +34,12 @@
 	a_0Box = document.getElementById("a_0");
 	a_1Box = document.getElementById("a_1");
 	t_bBox = document.getElementById("t_b");
+
+	fsBox.value = transmitParams.samplingFrequency;
+	fcBox.value = transmitParams.carrierWaveFrequency;
+	a_0Box.value = transmitParams.bitZeroAmplitude;
+	a_1Box.value = transmitParams.bitOneAmplitude;
+	t_bBox.value = transmitParams.samplesPerBit;
 	inputMessageBox = document.getElementById("inputMessage");
       }
       document.addEventListener("DOMContentLoaded", onDOMLoad);

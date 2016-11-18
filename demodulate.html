@@ -5,9 +5,9 @@
   <body>
     <script type="text/javascript" src="demodulate.js"></script>
 
-    <canvas id="waveform0" width="1024" height="256"></canvas> <br>
-    <canvas id="waveform1" width="1024" height="256"></canvas> <br>
-    <canvas id="waveform2" width="1024" height="256"></canvas> <br>
+    <canvas id="waveform0" width="1200" height="256"></canvas> <br>
+    <canvas id="waveform1" width="1200" height="256"></canvas> <br>
+    <canvas id="waveform2" width="1200" height="256"></canvas> <br>
 
     sampling rate:<input type="text" id="fs" value="44100" disabled><br>
     carrier wave frequency:<input type="text" id="fc" value="loading"><br>
@@ -22,7 +22,8 @@
       var samplesPerBitBox = null;
       var fcBox = null;
       var canvasses = [];
-      var canvasIndex = 0;
+      var canvasIndex = 3;
+      function getCanvas(index) { return canvasses[index % 3]; }
 
       function update() {
 	demodulateParams.noiseThreshold = parseFloat(noiseThresholdBox.value);
@@ -49,32 +50,84 @@
 	  document.getElementById("waveform1").getContext("2d"),
 	  document.getElementById("waveform2").getContext("2d"),
 	];
-	drawBufferCallback = function(buf) {
-	  updateWaveCanvas(canvasses[canvasIndex], buf);
-	  canvasIndex = (canvasIndex + 1) % canvasses.length;
+	drawBufferCallback = function(buf, highlights) {
+	  updateWaveCanvas(getCanvas(canvasIndex), getCanvas(canvasIndex - 1),
+                           buf, highlights);
+	  canvasIndex += 1;
 	}
 	record();
       }
       document.addEventListener("DOMContentLoaded", onDOMLoad);
 
-      function updateWaveCanvas(waveCanvas, buf) {
+      function updateWaveCanvas(waveCanvas, oldCanvas, buf, highlights) {
 	var canvasLength = 1024;
+	var canvasHeight = 256;
+
+        function timeToX(time) {
+          return time / canvasLength;
+        }
+        function signalToY(signal) {
+          return 128 - signal * 128;
+        }
+        function xToIndex(x) {
+          return x * buf.length / canvasLength;
+        }
+        function indexToX(index) {
+          return index * canvasLength / buf.length;
+        }
+        console.log(highlights);
 	var stepSize = 128;
-	waveCanvas.clearRect(0, 0, 1024, 256);
+	waveCanvas.clearRect(0, 0, canvasLength + 100, canvasHeight);
 	waveCanvas.strokeStyle = "red";
+	waveCanvas.fillStyle = "red";
+        waveCanvas.fillRect(canvasLength + 50, 128, 10, 10);
+        oldCanvas.clearRect(canvasLength + 50, 128, 10, 10);
 	waveCanvas.beginPath();
 	for (var i = 0; i <= canvasLength / stepSize ; i += 1) {
 	  waveCanvas.moveTo(i * stepSize, 0);
-	  waveCanvas.lineTo(i * stepSize, 256);
+	  waveCanvas.lineTo(i * stepSize, canvasHeight);
 	}
 	waveCanvas.stroke();
 	waveCanvas.strokeStyle = "black";
 	waveCanvas.beginPath();
 	waveCanvas.moveTo(0, 128 + buf[0] * 128);
-	for (var i = 1; i < canvasLength; i++) {
-	  waveCanvas.lineTo(i, 128 + (buf[i * (buf.length / canvasLength)] * 128));
+	for (var x = 1; x < canvasLength; x++) {
+	  waveCanvas.lineTo(x, signalToY(buf[xToIndex(x)]) );
 	}
+
+        var max = 0;
+        var sum = 0;
+        var count = 0;
+        waveCanvas.globalAlpha = 0.2;
+        waveCanvas.fillStyle = "lime";
+        for (var i = 0; i < highlights.length; i++) {
+          var indexStart = highlights[i][0];
+          var indexEnd = indexStart + highlights[i][1];
+          waveCanvas.fillRect(indexToX(indexStart), 0,
+                              indexToX(indexEnd) - indexToX(indexStart), canvasHeight);
+          for (var j = indexStart; j < indexEnd; j++) {
+            max = Math.max(max, Math.abs(buf[j]));
+            sum += Math.abs(buf[j]);
+            count += 1;
+          }
+        }
+        waveCanvas.globalAlpha = 1;
+        var avg = sum / count;
+
 	waveCanvas.stroke();
+        waveCanvas.setLineDash([1, 3]);
+        waveCanvas.beginPath();
+        waveCanvas.moveTo(0, signalToY(max));
+        waveCanvas.lineTo(canvasLength - 1, signalToY(max));
+        waveCanvas.moveTo(0, signalToY(avg));
+        waveCanvas.lineTo(canvasLength - 1, signalToY(avg));
+	waveCanvas.stroke();
+        waveCanvas.setLineDash([]);
+
+        waveCanvas.font="10px Georgia";
+	waveCanvas.fillStyle = "black";
+        waveCanvas.fillText(max.toFixed(2), canvasLength, signalToY(max));
+        waveCanvas.fillText(avg.toFixed(2), canvasLength, signalToY(avg));
       }
     </script>
   </body>

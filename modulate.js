@@ -3,10 +3,10 @@ var onTransmitFinish = null;
 
 var transmitParams = {
   samplingFrequency: 44100,
-  carrierWaveFrequency: 10000,
+  carrierWaveFrequency: 1000,
   bitZeroAmplitude: 0.1,
   bitOneAmplitude: 0.5,
-  samplesPerBit: 128,
+  samplesPerBit: 256,
 };
 
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
