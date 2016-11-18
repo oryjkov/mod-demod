@@ -8,7 +8,7 @@ var demodulateParams = {
   //carrierWaveFrequency: 1000,
   samplesPerBit: 256,
   noiseThreshold: 0.02,
-  zeroOneThreshold: 0.09,
+  zeroOneThreshold: 0.55,
   readWindowSize: 64,  // Size of chunks read from the buffer (in samples).
   inputBufferSize: 16384,  // Size of the input buffer (in samples). 
 };
