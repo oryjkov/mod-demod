@@ -10,7 +10,8 @@
     </style>
   </head>
   <body>
-    <div style='width: 1800px; height: 1100px; position: relative; color: red;'>
+    <canvas id="bufferState" width="1800" height="25"></canvas><br>
+    <div id='players'style='width: 1800px; height: 1100px; position: relative; color: red;'>
       <div id='player0'></div>
       <div id='player1'></div>
       <div id='player2'></div>
@@ -20,6 +21,7 @@
       <div id='player6'></div>
       <div id='player7'></div>
     </div>
+    <br>
 
     <script type="text/javascript" src="demodulate.js"></script>
     <script>
@@ -38,17 +40,52 @@
 
       function onReceiverCreateFail(reason) { }
 
-      var videos_q = [];
+      class VideoQ {
+        constructor(canvas) {
+          this.size = 100;
+          this.q = [];
+          this.canvas = canvas;
+          this.updateProgress();
+        }
+        updateProgress() {
+          var canvasLength = 1800;
+          var canvasHeight = 25;
+          if (this.canvas == null) {
+            return;
+          }
+	  this.canvas.clearRect(0, 0, canvasLength, canvasHeight);
+	  this.canvas.fillStyle = "green";
+          var progress = this.q.length / this.size;
+          console.log(progress);
+          this.canvas.fillRect(0, 0, canvasLength * progress, canvasHeight);
+          this.canvas.font="14px Georgia";
+  	  this.canvas.fillStyle = "black";
+          this.canvas.fillText((progress * 100).toFixed(0), canvasLength * progress / 2, 12);
+        }
+        add(v) {
+	  if (this.q.length <= this.size) {
+	    this.q.push(v);
+	  }
+          this.updateProgress();
+        }
+        tryGet() {
+          this.updateProgress();
+          if (this.q.length > 0) {
+	    return this.q.shift();
+          } else {
+            return null;
+          }
+        }
+      }
+      var canvas = document.getElementById("bufferState").getContext("2d");
+      var videoQ = new VideoQ(canvas);
 
-      var buf = new ArrayBuffer(0);
       function onReceive(recvPayload) {
 	try {
           v = JSON.parse(recvPayload);
-	  if (videos_q.length <= 10) {
-	    videos_q.push(v);
-	  }
+          videoQ.add(v);
 	} catch (e) {
-	  console.log("failed to parse the message");
+	  console.log("failed to parse the message", e);
 	}
       }
       function onDOMLoad() {
@@ -75,29 +112,13 @@
 
       function onPlayerReady(event) {
         var that = getPlayerFromEvent(event);
-        that.maybeNextVideo();
-      }
-
-      function onPlayerStateChange(event) {
-        var that = getPlayerFromEvent(event);
-        if (event.data == YT.PlayerState.ENDED && that.playing_) {
-          // console.debug('onPlayerStateChange: ENDED');
-          that.playing_ = false;
-          that.maybeNextVideo()
-        } else if (event.data == YT.PlayerState.PLAYING) {
-          // console.debug('onPlayerStateChange: PLAYING');
-          that.playing_ = true;
-        }
+        window.setInterval(function() { that.watchDog(); }, 1000);
       }
 
       function onPlayerError(event) {
         var that = getPlayerFromEvent(event);
-        that.playing_ = false
-        var error = parseInt(event.data)
-        // Ignore not found and not allowed errors and load another video.
-        if (error = 100 || error == 101 || error == 150) {
-          setTimeout(function() { that.maybeNextVideo() }, 2100);
-        }
+        // Ignore all errors and move on
+        this.lastPlaybackScheduleTimeMs = 0;
       }
 
       class MyPlayer {
@@ -105,7 +126,9 @@
           this.videoList_ = [];
           this.videoIndex_ = 0;
           this.loading_ = false;
-          this.playing_ = false;
+          this.currentVideoDurationSec = 0;
+          this.toleranceTimeSec = 5;
+          this.lastPlaybackScheduleTimeMs = 0;
 
           this.player_ = new YT.Player(id, {
             width: '640',
@@ -118,26 +141,36 @@
             },
             events: {
               'onReady': onPlayerReady,
-              'onStateChange': onPlayerStateChange,
               'onError': onPlayerError
             }
           });
         }
 
+        watchDog() {
+          var secSinceLastPlayback = (Date.now() - this.lastPlaybackScheduleTimeMs) / 1000;
+          var alarmTimeSec = this.currentVideoDurationSec + this.toleranceTimeSec;
+          //console.log("watch dog! ", secSinceLastPlayback.toFixed(2), " ", alarmTimeSec.toFixed(2));
+          if (secSinceLastPlayback > alarmTimeSec) {
+            this.maybeNextVideo();
+            //console.log("nextVid");
+          }
+        }
+
         maybeNextVideo() {
-          if (videos_q.length == 0) {
-	    //console.log('queue empty, schdeluling a retry');
-            var that = this;
-            setTimeout(function() { that.maybeNextVideo() }, 1000);
+          var v = videoQ.tryGet();
+          if (v == null) {
+            // Try again.
+            this.lastPlaybackScheduleTimeMs = 0;
             return;
           }
-	  var v = videos_q.shift();
+          this.currentVideoDurationSec = v.e - v.s;
 
           this.player_.loadVideoById(
               {'videoId': v.v,
                'startSeconds': v.s,
                'endSeconds': v.e});
           this.player_.mute();
+          this.lastPlaybackScheduleTimeMs = Date.now();
         }
       }
 
