@@ -10,7 +10,8 @@
     bit zero frequency:<input type="text" id="bitZeroFrequency" value="" oninput="update()"><br>
     bit one frequency:<input type="text" id="bitOneFrequency" value="" oninput="update()"><br>
     samples per bit:<input type="text" id="samplesPerBit" value="" oninput="update()"><br>
-    <a href="player.html" id="playerLink">player</a>
+    <a href="player.html" id="player4Link">player4</a>
+    <a href="player.html" id="player8Link">player8</a><br>
 
     <canvas id="waveform0" width="1200" height="96"></canvas> <br>
     <canvas id="waveform1" width="1200" height="96"></canvas> <br>
@@ -42,7 +43,8 @@
         }
         console.log(ps);
         if (ps.length > 0) {
-          document.getElementById("playerLink").href = "player.html?" + ps;
+          document.getElementById("player4Link").href = "player.html?numPlayers=4&" + ps;
+          document.getElementById("player8Link").href = "player.html?numPlayers=8&" + ps;
         }
       }
 

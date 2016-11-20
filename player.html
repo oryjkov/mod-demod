@@ -15,6 +15,10 @@
       <div id='player1'></div>
       <div id='player2'></div>
       <div id='player3'></div>
+      <div id='player4'></div>
+      <div id='player5'></div>
+      <div id='player6'></div>
+      <div id='player7'></div>
     </div>
 
     <script type="text/javascript" src="demodulate.js"></script>
@@ -132,7 +136,7 @@
           this.player_.loadVideoById(
               {'videoId': v.v,
                'startSeconds': v.s,
-               'endSeconds': v.s + 10});
+               'endSeconds': v.e});
           this.player_.mute();
         }
       }
@@ -141,9 +145,13 @@
       tag.src = 'https://www.youtube.com/iframe_api';
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+      var numPlayers = 4;
+      if ("numPlayers" in urlArgs) {
+        numPlayers = urlArgs["numPlayers"];
+      }
 
       function onYouTubeIframeAPIReady() {
-        for (var i = 0; i < 4; ++i) {
+        for (var i = 0; i < numPlayers; ++i) {
           var id = 'player' + i;
 	  console.log('setting up player ', id);
           myPlayers[id] = new MyPlayer(id, parseInt(i % 2), parseInt(i / 2));
