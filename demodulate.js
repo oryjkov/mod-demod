@@ -15,12 +15,10 @@ var demodulateParams = {
 
 // Converts an array of 0/1 bits to a string.
 function messageToString(bits) {
-  var i = 0;
   var retval = "";
-  while (i < bits.length) {
-    var b = bitsToByte(bits.slice(i, i+8));
+  for (var i = 0; i < Math.round(bits.length / 8); i++) {
+    var b = bitsToByte(bits.slice(i * 8, (i + 1) * 8));
     retval = retval + String.fromCharCode(b);
-    i += 8;
   }
   return retval;
 }
