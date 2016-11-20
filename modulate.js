@@ -55,8 +55,9 @@ function stringToBitArray(messageString) {
 }
 
 function generateWaveform(bitArray) {
-  var numSamples = bitArray.length * transmitParams.samplesPerBit;
-  var buf = new Float32Array(numSamples);
+  // +1 for the silence to split messages.
+  var numSamples = (bitArray.length + 1) * transmitParams.samplesPerBit;
+  var buf = new Float32Array(numSamples + 1);
 
   // phase is used to pass in the phase offset as a value between 0 and 1.
   function generate_bit(buffer, offset, one, phase) {
@@ -77,6 +78,9 @@ function generateWaveform(bitArray) {
   for(var bit_index = 0; bit_index < bitArray.length; bit_index += 1) {
     phase = generate_bit(
       buf, bit_index * transmitParams.samplesPerBit, bitArray[bit_index] == 1, phase);
+  }
+  for (var i = 0; i < transmitParams.samplesPerBit; i++) {
+    buf[buf.length - 1 - i] = 0;
   }
   return buf;
 }
