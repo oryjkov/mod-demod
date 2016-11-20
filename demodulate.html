@@ -18,10 +18,6 @@
     <canvas id="waveform3" width="1200" height="96"></canvas> <br>
     <canvas id="waveform4" width="1200" height="96"></canvas> <br>
     <canvas id="waveform5" width="1200" height="96"></canvas> <br>
-    <canvas id="waveform6" width="1200" height="96"></canvas> <br>
-    <canvas id="waveform7" width="1200" height="96"></canvas> <br>
-    <canvas id="waveform8" width="1200" height="96"></canvas> <br>
-    <canvas id="waveform9" width="1200" height="96"></canvas> <br>
 
     <script>
       var noiseThresholdBox = null;
@@ -29,7 +25,7 @@
       var bitOneFrequencyBox = null;
       var samplesPerBitBox = null;
       var fcBox = null;
-      var numCanvasses = 10;
+      var numCanvasses = 5;
       var canvasses = [];
       var canvasIndex = numCanvasses;
       function getCanvas(index) { return canvasses[index % numCanvasses]; }
@@ -125,7 +121,6 @@
 	  waveCanvas.lineTo(x, signalToY(buf[xToIndex(x)]) );
 	}
 
-        var max = 0;
         var sum = 0;
         var count = 0;
         waveCanvas.globalAlpha = 0.2;
@@ -136,7 +131,6 @@
           waveCanvas.fillRect(indexToX(indexStart), 0,
                               indexToX(indexEnd) - indexToX(indexStart), canvasHeight);
           for (var j = indexStart; j < indexEnd; j++) {
-            max = Math.max(max, Math.abs(buf[j]));
             sum += Math.abs(buf[j]);
             count += 1;
           }
@@ -147,17 +141,16 @@
 	waveCanvas.stroke();
         waveCanvas.setLineDash([1, 3]);
         waveCanvas.beginPath();
-        waveCanvas.moveTo(0, signalToY(max));
-        waveCanvas.lineTo(canvasLength - 1, signalToY(max));
-        waveCanvas.moveTo(0, signalToY(avg));
-        waveCanvas.lineTo(canvasLength - 1, signalToY(avg));
+        waveCanvas.moveTo(0, signalToY(maxY));
+        waveCanvas.lineTo(canvasLength - 1, maxY);
+        waveCanvas.moveTo(0, signalToY(-avg));
+        waveCanvas.lineTo(canvasLength - 1, signalToY(-avg));
 	waveCanvas.stroke();
         waveCanvas.setLineDash([]);
 
         waveCanvas.font="10px Georgia";
 	waveCanvas.fillStyle = "black";
-        waveCanvas.fillText(max.toFixed(2), canvasLength, signalToY(max));
-        waveCanvas.fillText(avg.toFixed(2), canvasLength, signalToY(avg));
+        waveCanvas.fillText((-avg).toFixed(2), canvasLength, signalToY(-avg));
         waveCanvas.fillText(maxY.toFixed(2), canvasLength, 7);
       }
     </script>

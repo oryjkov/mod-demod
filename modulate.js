@@ -5,8 +5,8 @@ var transmitParams = {
   samplingFrequency: 44100,
   bitZeroAmplitude: 0.2,
   bitOneAmplitude: 0.2,
-  bitZeroFrequency: 1300,
-  bitOneFrequency: 2300,
+  bitZeroFrequency: 1200,
+  bitOneFrequency: 2200,
   samplesPerBit: 256,
 };
 

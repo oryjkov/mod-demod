@@ -63,15 +63,16 @@ var bufferCount = 0;
 var oldBuf = new Float32Array(demodulateParams.samplesPerBit);
 
 function processSymbol(buffer) {
+  // Average between the number of zero crossings for zero and one waves.
   var zeroCrossingsThreshold = ((demodulateParams.samplesPerBit / demodulateParams.samplingFrequency) * (2200 + 1200) * 2) / 2;
-  var cnt = processSymbolZeroCrossings(buffer);
+  var cnt = countZeroCrossings(buffer);
   message.push(cnt < zeroCrossingsThreshold ? 0 : 1);
 }
 
-function processSymbolZeroCrossings(alignedBuffer) {
+function countZeroCrossings(buffer) {
   var count = 0;
   for (var i = 1; i < demodulateParams.samplesPerBit; i++) {
-    if (alignedBuffer[i - 1] * alignedBuffer[i] < 0) {
+    if (buffer[i - 1] * buffer[i] < 0) {
       count += 1;
     }
   }
