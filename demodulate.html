@@ -5,24 +5,34 @@
   <body>
     <script type="text/javascript" src="demodulate.js"></script>
 
-    <canvas id="waveform0" width="1200" height="256"></canvas> <br>
-    <canvas id="waveform1" width="1200" height="256"></canvas> <br>
-    <canvas id="waveform2" width="1200" height="256"></canvas> <br>
-
     sampling rate:<input type="text" id="fs" value="44100" disabled><br>
     noise threshold:<input type="text" id="noiseThreshold" value="" oninput="update()"><br>
-    bit threshold:<input type="text" id="zeroOneThreshold" value="" oninput="update()"><br>
+    bit zero frequency:<input type="text" id="bitZeroFrequency" value="" oninput="update()"><br>
+    bit one frequency:<input type="text" id="bitOneFrequency" value="" oninput="update()"><br>
     samples per bit:<input type="text" id="samplesPerBit" value="" oninput="update()"><br>
     <a href="player.html" id="playerLink">player</a>
 
+    <canvas id="waveform0" width="1200" height="96"></canvas> <br>
+    <canvas id="waveform1" width="1200" height="96"></canvas> <br>
+    <canvas id="waveform2" width="1200" height="96"></canvas> <br>
+    <canvas id="waveform3" width="1200" height="96"></canvas> <br>
+    <canvas id="waveform4" width="1200" height="96"></canvas> <br>
+    <canvas id="waveform5" width="1200" height="96"></canvas> <br>
+    <canvas id="waveform6" width="1200" height="96"></canvas> <br>
+    <canvas id="waveform7" width="1200" height="96"></canvas> <br>
+    <canvas id="waveform8" width="1200" height="96"></canvas> <br>
+    <canvas id="waveform9" width="1200" height="96"></canvas> <br>
+
     <script>
       var noiseThresholdBox = null;
-      var zeroOneThresholdBox = null;
+      var bitZeroFrequencyBox = null;
+      var bitOneFrequencyBox = null;
       var samplesPerBitBox = null;
       var fcBox = null;
+      var numCanvasses = 10;
       var canvasses = [];
-      var canvasIndex = 3;
-      function getCanvas(index) { return canvasses[index % 3]; }
+      var canvasIndex = numCanvasses;
+      function getCanvas(index) { return canvasses[index % numCanvasses]; }
 
       function updatePlayerLink() {
         var ps = "";
@@ -42,34 +52,33 @@
 
       function update() {
 	demodulateParams.noiseThreshold = parseFloat(noiseThresholdBox.value);
-	demodulateParams.zeroOneThreshold = parseFloat(zeroOneThresholdBox.value);
+	demodulateParams.bitZeroFrequency = parseFloat(bitZeroFrequencyBox.value);
+	demodulateParams.bitOneFrequency = parseFloat(bitOneFrequencyBox.value);
 	demodulateParams.samplesPerBit = parseInt(samplesPerBitBox.value);
-        //demodulateParams.carrierWaveFrequency = parseInt(fcBox.value);
         updatePlayerLink();
       }
 
       function onDOMLoad() {
-	fcBox = document.getElementById("fc");
-        //fcBox.value = demodulateParams.carrierWaveFrequency;
-
 	fsBox = document.getElementById("fs");
 	fsBox.value = audioContext.sampleRate;
+        demodulateParams.samplingFrequency = audioContext.sampleRate;
 
 	noiseThresholdBox = document.getElementById("noiseThreshold");
-	zeroOneThresholdBox = document.getElementById("zeroOneThreshold");
+	bitZeroFrequencyBox = document.getElementById("bitZeroFrequency");
+	bitOneFrequencyBox = document.getElementById("bitOneFrequency");
 	samplesPerBitBox = document.getElementById("samplesPerBit");
+
 	noiseThresholdBox.value = demodulateParams.noiseThreshold;
-	zeroOneThresholdBox.value = demodulateParams.zeroOneThreshold;
+	bitZeroFrequencyBox.value = demodulateParams.bitZeroFrequency;
+	bitOneFrequencyBox.value = demodulateParams.bitOneFrequency;
 	samplesPerBitBox.value = demodulateParams.samplesPerBit;
 
-	canvasses = [
-	  document.getElementById("waveform0").getContext("2d"),
-	  document.getElementById("waveform1").getContext("2d"),
-	  document.getElementById("waveform2").getContext("2d"),
-	];
-	drawBufferCallback = function(buf, highlights) {
+        for (var i = 0; i < numCanvasses; i++) {
+	  canvasses.push(document.getElementById("waveform" + i).getContext("2d"));
+        }
+	drawBufferCallback = function(buf, bufLength, highlights) {
 	  updateWaveCanvas(getCanvas(canvasIndex), getCanvas(canvasIndex - 1),
-                           buf, highlights);
+                           buf, bufLength, highlights);
 	  canvasIndex += 1;
 	}
         updatePlayerLink();
@@ -77,29 +86,32 @@
       }
       document.addEventListener("DOMContentLoaded", onDOMLoad);
 
-      function updateWaveCanvas(waveCanvas, oldCanvas, buf, highlights) {
+      function updateWaveCanvas(waveCanvas, oldCanvas, buf, bufLength, highlights) {
+        var maxY = 0.01;
+        for (var x = 0; x < bufLength; x++) {
+          maxY = Math.max(maxY, Math.abs(buf[x]));
+        }
 	var canvasLength = 1024;
-	var canvasHeight = 256;
+	var canvasHeight = 96;
 
         function timeToX(time) {
           return time / canvasLength;
         }
         function signalToY(signal) {
-          return 128 - signal * 128;
+          return canvasHeight / 2 - (signal / (maxY * 1.05)) * (canvasHeight / 2);
         }
         function xToIndex(x) {
-          return x * buf.length / canvasLength;
+          return x * bufLength / canvasLength;
         }
         function indexToX(index) {
-          return index * canvasLength / buf.length;
+          return index * canvasLength / bufLength;
         }
-        console.log(highlights);
 	var stepSize = 128;
 	waveCanvas.clearRect(0, 0, canvasLength + 100, canvasHeight);
 	waveCanvas.strokeStyle = "red";
 	waveCanvas.fillStyle = "red";
-        waveCanvas.fillRect(canvasLength + 50, 128, 10, 10);
-        oldCanvas.clearRect(canvasLength + 50, 128, 10, 10);
+        waveCanvas.fillRect(canvasLength + 20, canvasHeight / 2, 10, 10);
+        oldCanvas.clearRect(canvasLength + 20, canvasHeight / 2, 10, 10);
 	waveCanvas.beginPath();
 	for (var i = 0; i <= canvasLength / stepSize ; i += 1) {
 	  waveCanvas.moveTo(i * stepSize, 0);
@@ -108,7 +120,7 @@
 	waveCanvas.stroke();
 	waveCanvas.strokeStyle = "black";
 	waveCanvas.beginPath();
-	waveCanvas.moveTo(0, 128 + buf[0] * 128);
+	waveCanvas.moveTo(0, signalToY(buf[0]));
 	for (var x = 1; x < canvasLength; x++) {
 	  waveCanvas.lineTo(x, signalToY(buf[xToIndex(x)]) );
 	}
@@ -146,6 +158,7 @@
 	waveCanvas.fillStyle = "black";
         waveCanvas.fillText(max.toFixed(2), canvasLength, signalToY(max));
         waveCanvas.fillText(avg.toFixed(2), canvasLength, signalToY(avg));
+        waveCanvas.fillText(maxY.toFixed(2), canvasLength, 7);
       }
     </script>
   </body>

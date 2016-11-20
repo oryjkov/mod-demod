@@ -5,38 +5,46 @@
   <body>
     <script type="text/javascript" src="modulate.js"></script>
     sampling rate:<input type="text" id="fs" value="44100"><br>
-    carrier wave frequency:<input type="text" id="fc" value=""><br>
     amplitude of 0:<input type="text" id="a_0" value=""><br>
     amplitude of 1:<input type="text" id="a_1" value=""><br>
+    frequency of 0:<input type="text" id="f0" value=""><br>
+    frequency of 1:<input type="text" id="f1" value=""><br>
     samples per bit:<input type="text" id="t_b" value=""><br>
-    <textarea autofocus="true" autocapitalize="none" autocomplete="off" spellcheck="off" class="form-control" style="resize:none" rows="5" id="inputMessage" value=>{"v":"VI8gdmjEwKc","s":111}</textarea><br>
+    <textarea autofocus="true" autocapitalize="none" autocomplete="off" spellcheck="off" class="form-control" style="resize:none" rows="5" id="inputMessage" value=>U</textarea><br>
     <button onclick="play()">play</button><br>
 
     <script>
       var fsBox = null;
-      var fcBox = null;
+      var f0Box = null;
+      var f1Box = null;
       var a_0Box = null;
       var a_1Box = null;
       var t_bBox = null;
       var inputMessageBox = null;
 
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      var audioContext = new AudioContext();
+
       function play() {
 	transmitParams.samplingFrequency = parseInt(fsBox.value);
-	transmitParams.carrierWaveFrequency = parseInt(fcBox.value);
+	transmitParams.bitZeroFrequency = parseInt(f0Box.value);
+	transmitParams.bitOneFrequency = parseInt(f1Box.value);
 	transmitParams.bitZeroAmplitude = parseFloat(a_0Box.value);
 	transmitParams.bitOneAmplitude = parseFloat(a_1Box.value);
 	transmitParams.samplesPerBit = parseInt(t_bBox.value);
-	transmitMessage(inputMessageBox.value);
+	transmitMessage(inputMessageBox.value, audioContext);
       }
       function onDOMLoad() {
 	fsBox = document.getElementById("fs");
-	fcBox = document.getElementById("fc");
+	f0Box = document.getElementById("f0");
+	f1Box = document.getElementById("f1");
 	a_0Box = document.getElementById("a_0");
 	a_1Box = document.getElementById("a_1");
 	t_bBox = document.getElementById("t_b");
 
 	fsBox.value = transmitParams.samplingFrequency;
-	fcBox.value = transmitParams.carrierWaveFrequency;
+	f0Box.value = transmitParams.bitZeroFrequency;
+	f1Box.value = transmitParams.bitOneFrequency;
 	a_0Box.value = transmitParams.bitZeroAmplitude;
 	a_1Box.value = transmitParams.bitOneAmplitude;
 	t_bBox.value = transmitParams.samplesPerBit;
