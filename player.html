@@ -56,7 +56,7 @@
 	  this.canvas.clearRect(0, 0, canvasLength, canvasHeight);
 	  this.canvas.fillStyle = "green";
           var progress = this.q.length / this.size;
-          console.log(progress);
+          //console.log(progress);
           this.canvas.fillRect(0, 0, canvasLength * progress, canvasHeight);
           this.canvas.font="14px Georgia";
   	  this.canvas.fillStyle = "black";
@@ -119,6 +119,7 @@
         var that = getPlayerFromEvent(event);
         // Ignore all errors and move on
         this.lastPlaybackScheduleTimeMs = 0;
+        console.log("restarting on error");
       }
 
       class MyPlayer {
@@ -149,15 +150,24 @@
         watchDog() {
           var secSinceLastPlayback = (Date.now() - this.lastPlaybackScheduleTimeMs) / 1000;
           var alarmTimeSec = this.currentVideoDurationSec + this.toleranceTimeSec;
-          //console.log("watch dog! ", secSinceLastPlayback.toFixed(2), " ", alarmTimeSec.toFixed(2));
           if (secSinceLastPlayback > alarmTimeSec) {
             this.maybeNextVideo();
-            //console.log("nextVid");
+            return;
+          }
+          // Restart if not playing or buffering.
+          if (this.player_.getPlayerState() == 1 || this.player_.getPlayerState() == 3) { return; }
+          if (secSinceLastPlayback > this.toleranceTimeSec) {
+            this.maybeNextVideo();
+            return;
+          }
+          if (this.player_.getPlayerState() != 1) {
+            console.log(this.player_.getPlayerState());
           }
         }
 
         maybeNextVideo() {
           var v = videoQ.tryGet();
+          if (this.player_.getPlayerState() == 1 || this.player_.getPlayerState() == 3) { return; }
           if (v == null) {
             // Try again.
             this.lastPlaybackScheduleTimeMs = 0;
