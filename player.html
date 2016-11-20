@@ -60,7 +60,7 @@
           this.canvas.fillRect(0, 0, canvasLength * progress, canvasHeight);
           this.canvas.font="14px Georgia";
   	  this.canvas.fillStyle = "black";
-          this.canvas.fillText((progress * 100).toFixed(0), canvasLength * progress / 2, 12);
+          this.canvas.fillText((this.q.length).toFixed(0), canvasLength * progress / 2, 12);
         }
         add(v) {
 	  if (this.q.length <= this.size) {

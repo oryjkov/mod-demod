@@ -76,14 +76,13 @@ function countZeroCrossings(buffer) {
       count += 1;
     }
   }
-  console.log(count);
   return count;
 }
 
 // End of transmission.
 function endOfTransmission() {
   console.log("read %d bits", message.length);
-  console.log("raw message:", message);
+  //console.log("raw message:", message);
   stringMessage = messageToString(message);
   console.log(stringMessage);
   if (messageReceivedCallback) {
@@ -99,7 +98,6 @@ function processWindow(buf, startIndex, length) {
     messageBuffer[bufferLength + i] = buf[startIndex + i];
   }
   bufferLength += length;
-  console.log("pushed ", length);
 
   while (bufferLength >= demodulateParams.samplesPerBit) {
     processSymbol(messageBuffer);
@@ -170,12 +168,13 @@ function processBuffer(audioProcessingEvent) {
     drawBufferCallback(buf, newBuf.length, highlights);
   }
   var t1 = performance.now();
+  /*
   if (interestingBuffer.length > 0) {
     console.log("%s: draw buffer at time %d, playback time %.2f," +
                 "buffer count: %d, processing took: %.2f ms",
                 interestingBuffer, audioProcessingEvent.timeStamp,
                 audioProcessingEvent.playbackTime, bufferCount, (t1 - t0));
-  }
+  }*/
   if (t1 - t0 > buf.duration) {
     alert("Event processing took longer than the input buffer length.");
   }
