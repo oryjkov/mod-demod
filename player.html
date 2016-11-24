@@ -89,6 +89,14 @@
 	}
       }
       function onDOMLoad() {
+        var reloadInterval = 300;
+        if ("reloadInterval" in urlArgs) {
+          reloadInterval = urlArgs["reloadInterval"];
+        }
+        if (reloadInterval > 0) {
+          setTimeout(function() { location.reload(); } , reloadInterval * 1000);
+        }
+
         for (var param in demodulateParams) {
           if (demodulateParams.hasOwnProperty(param) && urlArgs.hasOwnProperty(param)) {
             if (urlArgs[param].indexOf(".") != -1) {
