@@ -49,38 +49,38 @@
       }
 
       function update() {
-	demodulateParams.noiseThreshold = parseFloat(noiseThresholdBox.value);
-	demodulateParams.bitZeroFrequency = parseFloat(bitZeroFrequencyBox.value);
-	demodulateParams.bitOneFrequency = parseFloat(bitOneFrequencyBox.value);
-	demodulateParams.samplesPerBit = parseInt(samplesPerBitBox.value);
+        demodulateParams.noiseThreshold = parseFloat(noiseThresholdBox.value);
+        demodulateParams.bitZeroFrequency = parseFloat(bitZeroFrequencyBox.value);
+        demodulateParams.bitOneFrequency = parseFloat(bitOneFrequencyBox.value);
+        demodulateParams.samplesPerBit = parseInt(samplesPerBitBox.value);
         updatePlayerLink();
       }
 
       function onDOMLoad() {
-	fsBox = document.getElementById("fs");
-	fsBox.value = audioContext.sampleRate;
+        fsBox = document.getElementById("fs");
+        fsBox.value = audioContext.sampleRate;
         demodulateParams.samplingFrequency = audioContext.sampleRate;
 
-	noiseThresholdBox = document.getElementById("noiseThreshold");
-	bitZeroFrequencyBox = document.getElementById("bitZeroFrequency");
-	bitOneFrequencyBox = document.getElementById("bitOneFrequency");
-	samplesPerBitBox = document.getElementById("samplesPerBit");
+        noiseThresholdBox = document.getElementById("noiseThreshold");
+        bitZeroFrequencyBox = document.getElementById("bitZeroFrequency");
+        bitOneFrequencyBox = document.getElementById("bitOneFrequency");
+        samplesPerBitBox = document.getElementById("samplesPerBit");
 
-	noiseThresholdBox.value = demodulateParams.noiseThreshold;
-	bitZeroFrequencyBox.value = demodulateParams.bitZeroFrequency;
-	bitOneFrequencyBox.value = demodulateParams.bitOneFrequency;
-	samplesPerBitBox.value = demodulateParams.samplesPerBit;
+        noiseThresholdBox.value = demodulateParams.noiseThreshold;
+        bitZeroFrequencyBox.value = demodulateParams.bitZeroFrequency;
+        bitOneFrequencyBox.value = demodulateParams.bitOneFrequency;
+        samplesPerBitBox.value = demodulateParams.samplesPerBit;
 
         for (var i = 0; i < numCanvasses; i++) {
-	  canvasses.push(document.getElementById("waveform" + i).getContext("2d"));
+          canvasses.push(document.getElementById("waveform" + i).getContext("2d"));
         }
-	drawBufferCallback = function(buf, bufLength, highlights) {
-	  updateWaveCanvas(getCanvas(canvasIndex), getCanvas(canvasIndex - 1),
+        drawBufferCallback = function(buf, bufLength, highlights) {
+          updateWaveCanvas(getCanvas(canvasIndex), getCanvas(canvasIndex - 1),
                            buf, bufLength, highlights);
-	  canvasIndex += 1;
-	}
+          canvasIndex += 1;
+        }
         updatePlayerLink();
-	record();
+        record();
       }
       document.addEventListener("DOMContentLoaded", onDOMLoad);
 
@@ -89,8 +89,8 @@
         for (var x = 0; x < bufLength; x++) {
           maxY = Math.max(maxY, Math.abs(buf[x]));
         }
-	var canvasLength = 1024;
-	var canvasHeight = 96;
+        var canvasLength = 1024;
+        var canvasHeight = 96;
 
         function timeToX(time) {
           return time / canvasLength;
@@ -104,24 +104,24 @@
         function indexToX(index) {
           return index * canvasLength / bufLength;
         }
-	var stepSize = 128;
-	waveCanvas.clearRect(0, 0, canvasLength + 100, canvasHeight);
-	waveCanvas.strokeStyle = "red";
-	waveCanvas.fillStyle = "red";
+        var stepSize = 128;
+        waveCanvas.clearRect(0, 0, canvasLength + 100, canvasHeight);
+        waveCanvas.strokeStyle = "red";
+        waveCanvas.fillStyle = "red";
         waveCanvas.fillRect(canvasLength + 20, canvasHeight / 2, 10, 10);
         oldCanvas.clearRect(canvasLength + 20, canvasHeight / 2, 10, 10);
-	waveCanvas.beginPath();
-	for (var i = 0; i <= canvasLength / stepSize ; i += 1) {
-	  waveCanvas.moveTo(i * stepSize, 0);
-	  waveCanvas.lineTo(i * stepSize, canvasHeight);
-	}
-	waveCanvas.stroke();
-	waveCanvas.strokeStyle = "black";
-	waveCanvas.beginPath();
-	waveCanvas.moveTo(0, signalToY(buf[0]));
-	for (var x = 1; x < canvasLength; x++) {
-	  waveCanvas.lineTo(x, signalToY(buf[xToIndex(x)]) );
-	}
+        waveCanvas.beginPath();
+        for (var i = 0; i <= canvasLength / stepSize ; i += 1) {
+          waveCanvas.moveTo(i * stepSize, 0);
+          waveCanvas.lineTo(i * stepSize, canvasHeight);
+        }
+        waveCanvas.stroke();
+        waveCanvas.strokeStyle = "black";
+        waveCanvas.beginPath();
+        waveCanvas.moveTo(0, signalToY(buf[0]));
+        for (var x = 1; x < canvasLength; x++) {
+          waveCanvas.lineTo(x, signalToY(buf[xToIndex(x)]) );
+        }
 
         var sum = 0;
         var count = 0;
@@ -140,18 +140,18 @@
         waveCanvas.globalAlpha = 1;
         var avg = sum / count;
 
-	waveCanvas.stroke();
+        waveCanvas.stroke();
         waveCanvas.setLineDash([1, 3]);
         waveCanvas.beginPath();
         waveCanvas.moveTo(0, signalToY(maxY));
         waveCanvas.lineTo(canvasLength - 1, maxY);
         waveCanvas.moveTo(0, signalToY(-avg));
         waveCanvas.lineTo(canvasLength - 1, signalToY(-avg));
-	waveCanvas.stroke();
+        waveCanvas.stroke();
         waveCanvas.setLineDash([]);
 
         waveCanvas.font="10px Georgia";
-	waveCanvas.fillStyle = "black";
+        waveCanvas.fillStyle = "black";
         waveCanvas.fillText((-avg).toFixed(2), canvasLength, signalToY(-avg));
         waveCanvas.fillText(maxY.toFixed(2), canvasLength, 7);
       }

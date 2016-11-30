@@ -26,29 +26,29 @@
       var audioContext = new AudioContext();
 
       function play() {
-	transmitParams.samplingFrequency = parseInt(fsBox.value);
-	transmitParams.bitZeroFrequency = parseInt(f0Box.value);
-	transmitParams.bitOneFrequency = parseInt(f1Box.value);
-	transmitParams.bitZeroAmplitude = parseFloat(a_0Box.value);
-	transmitParams.bitOneAmplitude = parseFloat(a_1Box.value);
-	transmitParams.samplesPerBit = parseInt(t_bBox.value);
-	transmitMessage(inputMessageBox.value, audioContext);
+        transmitParams.samplingFrequency = parseInt(fsBox.value);
+        transmitParams.bitZeroFrequency = parseInt(f0Box.value);
+        transmitParams.bitOneFrequency = parseInt(f1Box.value);
+        transmitParams.bitZeroAmplitude = parseFloat(a_0Box.value);
+        transmitParams.bitOneAmplitude = parseFloat(a_1Box.value);
+        transmitParams.samplesPerBit = parseInt(t_bBox.value);
+        transmitMessage(inputMessageBox.value, audioContext);
       }
       function onDOMLoad() {
-	fsBox = document.getElementById("fs");
-	f0Box = document.getElementById("f0");
-	f1Box = document.getElementById("f1");
-	a_0Box = document.getElementById("a_0");
-	a_1Box = document.getElementById("a_1");
-	t_bBox = document.getElementById("t_b");
+        fsBox = document.getElementById("fs");
+        f0Box = document.getElementById("f0");
+        f1Box = document.getElementById("f1");
+        a_0Box = document.getElementById("a_0");
+        a_1Box = document.getElementById("a_1");
+        t_bBox = document.getElementById("t_b");
 
-	fsBox.value = transmitParams.samplingFrequency;
-	f0Box.value = transmitParams.bitZeroFrequency;
-	f1Box.value = transmitParams.bitOneFrequency;
-	a_0Box.value = transmitParams.bitZeroAmplitude;
-	a_1Box.value = transmitParams.bitOneAmplitude;
-	t_bBox.value = transmitParams.samplesPerBit;
-	inputMessageBox = document.getElementById("inputMessage");
+        fsBox.value = transmitParams.samplingFrequency;
+        f0Box.value = transmitParams.bitZeroFrequency;
+        f1Box.value = transmitParams.bitOneFrequency;
+        a_0Box.value = transmitParams.bitZeroAmplitude;
+        a_1Box.value = transmitParams.bitOneAmplitude;
+        t_bBox.value = transmitParams.samplesPerBit;
+        inputMessageBox = document.getElementById("inputMessage");
       }
       document.addEventListener("DOMContentLoaded", onDOMLoad);
 

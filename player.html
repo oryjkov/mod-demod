@@ -54,25 +54,25 @@
           if (this.canvas == null) {
             return;
           }
-	  this.canvas.clearRect(0, 0, canvasLength, canvasHeight);
-	  this.canvas.fillStyle = "green";
+          this.canvas.clearRect(0, 0, canvasLength, canvasHeight);
+          this.canvas.fillStyle = "green";
           var progress = this.q.length / this.size;
           //console.log(progress);
           this.canvas.fillRect(0, 0, canvasLength * progress, canvasHeight);
           this.canvas.font="14px Georgia";
-  	  this.canvas.fillStyle = "black";
+          this.canvas.fillStyle = "black";
           this.canvas.fillText((this.q.length).toFixed(0), canvasLength * progress / 2, 12);
         }
         add(v) {
-	  if (this.q.length <= this.size) {
-	    this.q.push(v);
-	  }
+          if (this.q.length <= this.size) {
+            this.q.push(v);
+          }
           this.updateProgress();
         }
         tryGet() {
           this.updateProgress();
           if (this.q.length > 0) {
-	    return this.q.shift();
+            return this.q.shift();
           } else {
             return null;
           }
@@ -82,12 +82,12 @@
       var videoQ = new VideoQ(canvas);
 
       function onReceive(recvPayload) {
-	try {
+        try {
           var v = JSON.parse(recvPayload);
           videoQ.add(v);
-	} catch (e) {
-	  console.log("failed to parse the message", e);
-	}
+        } catch (e) {
+          console.log("failed to parse the message", e);
+        }
       }
       function onDOMLoad() {
         var reloadInterval = 300;
@@ -107,8 +107,8 @@
             }
           }
         }
-	messageReceivedCallback = onReceive;
-	record();
+        messageReceivedCallback = onReceive;
+        record();
       }
 
       document.addEventListener("DOMContentLoaded", onDOMLoad);
@@ -205,7 +205,7 @@
       function onYouTubeIframeAPIReady() {
         for (var i = 0; i < numPlayers; ++i) {
           var id = 'player' + i;
-	  console.log('setting up player ', id);
+          console.log('setting up player ', id);
           myPlayers[id] = new MyPlayer(id, parseInt(i % 2), parseInt(i / 2));
         }
       }
