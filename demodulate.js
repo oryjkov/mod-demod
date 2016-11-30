@@ -216,14 +216,6 @@ function gotStream(stream) {
   micSource = audioContext.createMediaStreamSource(stream);
   bandFilter = audioContext.createBiquadFilter();
 
-  /*
-  bandFilter.type = "bandpass"
-  bandFilter.frequency = demodulateParams.carrierWaveFrequency;
-  bandFilter.Q = 1000;
-  micSource.connect(bandFilter);
-  bandFilter.connect(scriptNode);
-  */
-
   // Workaround for
   // https://stackoverflow.com/questions/19482155/do-webaudio-scriptprocessornodes-require-an-output-to-be-connected
   var dummy_gain = audioContext.createGain();
