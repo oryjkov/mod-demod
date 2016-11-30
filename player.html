@@ -83,7 +83,7 @@
 
       function onReceive(recvPayload) {
 	try {
-          v = JSON.parse(recvPayload);
+          var v = JSON.parse(recvPayload);
           videoQ.add(v);
 	} catch (e) {
 	  console.log("failed to parse the message", e);
