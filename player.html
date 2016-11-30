@@ -26,12 +26,12 @@
     <script type="text/javascript" src="demodulate.js"></script>
     <script>
        "use strict";
-       urlArgs = function() {
+       var urlArgs = function() {
         var args = {};
         var spl = window.location.search.substring(1).split("&");
 
         for (var i = 0; i < spl.length; i++) {
-            ft = spl[i].split("=");
+            var ft = spl[i].split("=");
             args[ft[0]] = ft[1];
         }
         return args;
