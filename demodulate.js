@@ -3,6 +3,8 @@ var messageReceivedCallback = null;
 // Called to draw the buffer whenever an "interesting" buffer appears.
 // Buffer is the only argument.
 var drawBufferCallback = null;
+// Callback to draw a single symbol.
+var drawSymbolCallback = null;
 
 var demodulateParams = {
   samplingFrequency: 44100,
@@ -101,7 +103,9 @@ function processWindow(buf, startIndex, length) {
 
   while (bufferLength >= demodulateParams.samplesPerBit) {
     processSymbol(messageBuffer);
-    //drawBufferCallback(messageBuffer.slice(0, bufferLength), demodulateParams.samplesPerBit, []);
+    if (drawSymbolCallback) {
+      drawSymbolCallback(messageBuffer.slice(0, demodulateParams.samplesPerBit), []);
+    }
     // shift the buffer left.
     messageBuffer.copyWithin(0, demodulateParams.samplesPerBit, bufferLength);
     bufferLength -= demodulateParams.samplesPerBit;
@@ -148,7 +152,7 @@ function processBuffer(audioProcessingEvent) {
         interestingBuffer += "starting buffer";
         inWindowOffset = findOffset(buf, i, bigWindowSize, posAvg);
 
-        //drawBufferCallback(buf.slice(i, i + bigWindowSize), bigWindowSize, [[inWindowOffset, bigWindowSize - inWindowOffset]]);
+        //drawBufferCallback(buf.slice(i, i + bigWindowSize), [[inWindowOffset, bigWindowSize - inWindowOffset]]);
 
         highlights.push([i + inWindowOffset, bigWindowSize - inWindowOffset]);
         processWindow(buf, i + inWindowOffset, bigWindowSize - inWindowOffset);
@@ -165,7 +169,7 @@ function processBuffer(audioProcessingEvent) {
     }
   }
   if (interestingBuffer.length > 0 && drawBufferCallback) {
-    drawBufferCallback(buf, newBuf.length, highlights);
+    drawBufferCallback(buf.slice(0, newBuf.length), highlights);
   }
   var t1 = performance.now();
   /*

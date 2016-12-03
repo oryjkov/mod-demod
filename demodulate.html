@@ -3,33 +3,38 @@
   <head>
   </head>
   <body>
+    <!---<script type="text/javascript" src="dsp.js"></script> -->
     <script type="text/javascript" src="demodulate.js"></script>
 
-    sampling rate:<input type="text" id="fs" value="44100"><br>
-    noise threshold:<input type="text" id="noiseThreshold" value="" oninput="update()"><br>
-    bit zero frequency:<input type="text" id="bitZeroFrequency" value="" oninput="update()"><br>
-    bit one frequency:<input type="text" id="bitOneFrequency" value="" oninput="update()"><br>
-    samples per bit:<input type="text" id="samplesPerBit" value="" oninput="update()"><br>
+    <div id="controls"></div>
     <a href="player.html" id="player4Link">player4</a>
     <a href="player.html" id="player8Link">player8</a><br>
 
-    <canvas id="waveform0" width="1200" height="96"></canvas> <br>
-    <canvas id="waveform1" width="1200" height="96"></canvas> <br>
-    <canvas id="waveform2" width="1200" height="96"></canvas> <br>
-    <canvas id="waveform3" width="1200" height="96"></canvas> <br>
-    <canvas id="waveform4" width="1200" height="96"></canvas> <br>
-    <canvas id="waveform5" width="1200" height="96"></canvas> <br>
+    <div id="debugWaveforms"></div>
 
     <script>
-      var noiseThresholdBox = null;
-      var bitZeroFrequencyBox = null;
-      var bitOneFrequencyBox = null;
-      var samplesPerBitBox = null;
-      var fcBox = null;
-      var numCanvasses = 5;
+      var controls;
+      var dft;
+
+      var numCanvasses = 16;
+      var canvasLength = 512;
+      var canvasHeight = 96;
+
       var canvasses = [];
-      var canvasIndex = numCanvasses;
-      function getCanvas(index) { return canvasses[index % numCanvasses]; }
+      var canvasIndex = 0;
+      function getCanvas(index) { return canvasses[(numCanvasses + index) % canvasses.length]; }
+
+      function initDebugCanvasses(numCanvasses, div) {
+        var canvasses = [];
+        for (var i = 0; i < numCanvasses; i++) {
+          var canvas = document.createElement("canvas");
+          canvas.width = canvasLength + 50;
+          canvas.height = canvasHeight;
+          canvasses[i] = canvas.getContext("2d");
+          div.appendChild(canvas);
+        }
+        return canvasses;
+      }
 
       function updatePlayerLink() {
         var ps = "";
@@ -41,56 +46,75 @@
             ps += param + "=" + demodulateParams[param];
           }
         }
-        console.log(ps);
         if (ps.length > 0) {
           document.getElementById("player4Link").href = "player.html?numPlayers=4&" + ps;
           document.getElementById("player8Link").href = "player.html?numPlayers=8&" + ps;
         }
       }
 
+      function setupControls(div) {
+        var controls = Object();
+        for (var param in demodulateParams) {
+          if (demodulateParams.hasOwnProperty(param)) {
+            controls[param] = document.createElement("input");
+            controls[param].value = demodulateParams[param];
+            controls[param].oninput = update;
+            div.appendChild(controls[param]);
+            controls[param].insertAdjacentHTML("beforebegin", param + ":");
+            controls[param].insertAdjacentHTML("afterend", "<br>");
+          }
+        }
+        return controls;
+      }
+
+      function updateParams() {
+        for (var param in controls) {
+          if (controls.hasOwnProperty(param)) {
+            demodulateParams[param] = parseFloat(controls[param].value);
+          }
+        }
+      }
+
       function update() {
-        demodulateParams.noiseThreshold = parseFloat(noiseThresholdBox.value);
-        demodulateParams.bitZeroFrequency = parseFloat(bitZeroFrequencyBox.value);
-        demodulateParams.bitOneFrequency = parseFloat(bitOneFrequencyBox.value);
-        demodulateParams.samplesPerBit = parseInt(samplesPerBitBox.value);
+        updateParams();
         updatePlayerLink();
       }
 
       function onDOMLoad() {
-        fsBox = document.getElementById("fs");
-        fsBox.value = audioContext.sampleRate;
+        var controlsDiv = document.getElementById("controls");
+        controls = setupControls(controlsDiv);
+
         demodulateParams.samplingFrequency = audioContext.sampleRate;
 
-        noiseThresholdBox = document.getElementById("noiseThreshold");
-        bitZeroFrequencyBox = document.getElementById("bitZeroFrequency");
-        bitOneFrequencyBox = document.getElementById("bitOneFrequency");
-        samplesPerBitBox = document.getElementById("samplesPerBit");
+        var div = document.getElementById("debugWaveforms");
+        canvasses = initDebugCanvasses(numCanvasses, div);
+        canvasIndex = 0;
 
-        noiseThresholdBox.value = demodulateParams.noiseThreshold;
-        bitZeroFrequencyBox.value = demodulateParams.bitZeroFrequency;
-        bitOneFrequencyBox.value = demodulateParams.bitOneFrequency;
-        samplesPerBitBox.value = demodulateParams.samplesPerBit;
-
-        for (var i = 0; i < numCanvasses; i++) {
-          canvasses.push(document.getElementById("waveform" + i).getContext("2d"));
-        }
-        drawBufferCallback = function(buf, bufLength, highlights) {
+        var drawCallback = function(buf, highlights) {
           updateWaveCanvas(getCanvas(canvasIndex), getCanvas(canvasIndex - 1),
-                           buf, bufLength, highlights);
+                           buf, highlights);
           canvasIndex += 1;
+          /*
+          dft = new FFT(buf.length, demodulateParams.samplingFrequency);
+          dft.forward(buf);
+          updateWaveCanvas(getCanvas(canvasIndex), getCanvas(canvasIndex - 1),
+                           dft.spectrum, []);
+          canvasIndex += 1;
+          */
         }
+        drawBufferCallback = drawCallback;
+        //drawSymbolCallback = drawCallback;
         updatePlayerLink();
         record();
       }
       document.addEventListener("DOMContentLoaded", onDOMLoad);
 
-      function updateWaveCanvas(waveCanvas, oldCanvas, buf, bufLength, highlights) {
+      function updateWaveCanvas(waveCanvas, oldCanvas, buf, highlights) {
+        bufLength = buf.length;
         var maxY = 0.01;
         for (var x = 0; x < bufLength; x++) {
           maxY = Math.max(maxY, Math.abs(buf[x]));
         }
-        var canvasLength = 1024;
-        var canvasHeight = 96;
 
         function timeToX(time) {
           return time / canvasLength;
