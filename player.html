@@ -10,7 +10,7 @@
     </style>
   </head>
   <body>
-    <canvas id="bufferState" width="1800" height="25"></canvas><br>
+    <div id='bufQ'></div>
     <div id='players'></div>
 
     <script type="text/javascript" src="demodulate.js"></script>
@@ -68,8 +68,11 @@
           }
         }
       }
-      var canvas = document.getElementById("bufferState").getContext("2d");
-      var videoQ = new VideoQ(canvas);
+      var qCanvas = document.createElement("canvas");
+      document.getElementById("bufQ").appendChild(qCanvas);
+      qCanvas.width = window.width;
+      qCanvas.height = 25;
+      var videoQ = new VideoQ(qCanvas.getContext("2d"));
 
       function onReceive(recvPayload) {
         try {
