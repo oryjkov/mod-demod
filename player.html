@@ -11,17 +11,7 @@
   </head>
   <body>
     <canvas id="bufferState" width="1800" height="25"></canvas><br>
-    <div id='players'style='width: 1800px; height: 1100px; position: relative; color: red;'>
-      <div id='player0'></div>
-      <div id='player1'></div>
-      <div id='player2'></div>
-      <div id='player3'></div>
-      <div id='player4'></div>
-      <div id='player5'></div>
-      <div id='player6'></div>
-      <div id='player7'></div>
-    </div>
-    <br>
+    <div id='players'></div>
 
     <script type="text/javascript" src="demodulate.js"></script>
     <script>
@@ -132,7 +122,7 @@
       }
 
       class MyPlayer {
-        constructor(id, x, y) {
+        constructor(element, x, y) {
           this.videoList_ = [];
           this.videoIndex_ = 0;
           this.loading_ = false;
@@ -140,7 +130,7 @@
           this.toleranceTimeSec = 5;
           this.lastPlaybackScheduleTimeMs = 0;
 
-          this.player_ = new YT.Player(id, {
+          this.player_ = new YT.Player(element.id, {
             width: '640',
             height: '480',
             playerVars: {
@@ -204,9 +194,11 @@
 
       function onYouTubeIframeAPIReady() {
         for (var i = 0; i < numPlayers; ++i) {
-          var id = 'player' + i;
-          console.log('setting up player ', id);
-          myPlayers[id] = new MyPlayer(id, parseInt(i % 2), parseInt(i / 2));
+          console.log('setting up player ', i);
+          var div = document.createElement('div');
+          div.id = 'player' + i;
+          document.getElementById('players').appendChild(div); 
+          myPlayers[i] = new MyPlayer(div, parseInt(i % 2), parseInt(i / 2));
         }
       }
     </script>
