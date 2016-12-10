@@ -70,7 +70,7 @@
       }
       var qCanvas = document.createElement("canvas");
       document.getElementById("bufQ").appendChild(qCanvas);
-      qCanvas.width = window.width;
+      qCanvas.width = window.innerWidth;
       qCanvas.height = 25;
       var videoQ = new VideoQ(qCanvas.getContext("2d"));
 
@@ -120,7 +120,7 @@
       function onPlayerError(event) {
         var that = getPlayerFromEvent(event);
         // Ignore all errors and move on
-        this.lastPlaybackScheduleTimeMs = 0;
+        that.lastPlaybackScheduleTimeMs = 0;
         console.log("restarting on error");
       }
 
