@@ -17,19 +17,15 @@
     <script>
        "use strict";
        var urlArgs = function() {
-        var args = {};
-        var spl = window.location.search.substring(1).split("&");
+         var args = {};
+         var spl = window.location.search.substring(1).split("&");
 
-        for (var i = 0; i < spl.length; i++) {
-            var ft = spl[i].split("=");
-            args[ft[0]] = ft[1];
-        }
-        return args;
-      }();
-
-      var content = new ArrayBuffer(0);
-
-      function onReceiverCreateFail(reason) { }
+         for (var i = 0; i < spl.length; i++) {
+           var ft = spl[i].split("=");
+           args[ft[0]] = ft[1];
+         }
+         return args;
+       }();
 
       class VideoQ {
         constructor(canvas) {
@@ -47,7 +43,7 @@
           this.canvas.clearRect(0, 0, canvasLength, canvasHeight);
           this.canvas.fillStyle = "green";
           var progress = this.q.length / this.size;
-          //console.log(progress);
+
           this.canvas.fillRect(0, 0, canvasLength * progress, canvasHeight);
           this.canvas.font="14px Georgia";
           this.canvas.fillStyle = "black";
