@@ -27,6 +27,11 @@
          return args;
        }();
 
+       var numPlayers = 4;
+       if ("numPlayers" in urlArgs) {
+         numPlayers = urlArgs["numPlayers"];
+       }
+
       class VideoQ {
         constructor(canvas) {
           this.size = 100;
@@ -97,6 +102,12 @@
           }
         }
         messageReceivedCallback = onReceive;
+
+        var tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
         record();
       }
 
@@ -122,9 +133,6 @@
 
       class MyPlayer {
         constructor(element, x, y) {
-          this.videoList_ = [];
-          this.videoIndex_ = 0;
-          this.loading_ = false;
           this.currentVideoDurationSec = 0;
           this.toleranceTimeSec = 5;
           this.lastPlaybackScheduleTimeMs = 0;
@@ -180,15 +188,6 @@
           this.player_.mute();
           this.lastPlaybackScheduleTimeMs = Date.now();
         }
-      }
-
-      var tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      var firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      var numPlayers = 4;
-      if ("numPlayers" in urlArgs) {
-        numPlayers = urlArgs["numPlayers"];
       }
 
       function onYouTubeIframeAPIReady() {
