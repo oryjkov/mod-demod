@@ -198,7 +198,7 @@
           var div = document.createElement('div');
           div.id = 'player' + i;
           document.getElementById('players').appendChild(div); 
-          myPlayers[i] = new MyPlayer(div, parseInt(i % 2), parseInt(i / 2));
+          myPlayers[div.id] = new MyPlayer(div, parseInt(i % 2), parseInt(i / 2));
         }
       }
     </script>
