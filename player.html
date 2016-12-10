@@ -103,7 +103,7 @@
         }
         messageReceivedCallback = onReceive;
 
-        tryLoadYTIframApi();
+        tryLoadYTIframeApi();
         record();
       }
 
@@ -185,7 +185,7 @@
           this.lastPlaybackScheduleTimeMs = Date.now();
         }
       }
-      function tryLoadYTIframApi() {
+      function tryLoadYTIframeApi() {
         if (!navigator.onLine) {
           setTimeout(tryLoadYTIframeApi, 1000);
         }
