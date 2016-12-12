@@ -128,12 +128,14 @@
       }
 
       class MyPlayer {
-        constructor(element, x, y) {
+        constructor(playerElement, infoBox) {
           this.currentVideoDurationSec = 0;
           this.toleranceTimeSec = 5;
           this.lastPlaybackScheduleTimeMs = 0;
+          this.infoBox = infoBox
+          this.infoBox.textContent = 'no video';
 
-          this.player_ = new YT.Player(element.id, {
+          this.player_ = new YT.Player(playerElement.id, {
             width: '640',
             height: '480',
             playerVars: {
@@ -180,9 +182,10 @@
           this.player_.loadVideoById(
               {'videoId': v.v,
                'startSeconds': v.s,
-               'endSeconds': v.e});
+               'endSeconds': v.s + 30});
           this.player_.mute();
           this.lastPlaybackScheduleTimeMs = Date.now();
+          this.infoBox.textContent = JSON.stringify(v);
         }
       }
       function tryLoadYTIframeApi() {
@@ -199,10 +202,21 @@
       function onYouTubeIframeAPIReady() {
         for (var i = 0; i < numPlayers; ++i) {
           console.log('setting up player ', i);
-          var div = document.createElement('div');
-          div.id = 'player' + i;
+          var div = document.createElement('span');
+          div.style.display='inline-block';
           document.getElementById('players').appendChild(div); 
-          myPlayers[div.id] = new MyPlayer(div, parseInt(i % 2), parseInt(i / 2));
+
+          var playerDiv = document.createElement('div');
+          var infoDiv = document.createElement('div');
+          infoDiv.style.width = '640px';
+          infoDiv.style.height = '60px';
+          infoDiv.style.display = 'block';
+
+          div.appendChild(playerDiv);
+          div.appendChild(infoDiv);
+
+          playerDiv.id = 'player' + i;
+          myPlayers[playerDiv.id] = new MyPlayer(playerDiv, infoDiv)
         }
       }
     </script>
