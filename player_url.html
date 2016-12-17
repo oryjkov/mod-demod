@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <div id='bufQ'></div>
+    <div id='players'></div>
+
+    <script type="text/javascript" src="demodulate.js"></script>
+    <script type="text/javascript" src="player.js"></script>
+    <script type="text/javascript" src="video_q.js"></script>
+    <script>
+      "use strict";
+      var urlArgs = function() {
+        var args = {};
+        var spl = window.location.search.substring(1).split("&");
+
+        for (var i = 0; i < spl.length; i++) {
+          var ft = spl[i].split("=");
+          args[ft[0]] = ft[1];
+        }
+        return args;
+      }();
+
+      var numPlayers = 4;
+      if ("numPlayers" in urlArgs) {
+        numPlayers = urlArgs["numPlayers"];
+      }
+      playerParams.numPlayers = numPlayers;
+      playerParams.playersDiv = document.getElementById('players')
+
+      var qCanvas = document.createElement("canvas");
+      document.getElementById("bufQ").appendChild(qCanvas);
+      var videoQ = new VideoQ(qCanvas.getContext("2d"));
+      playerParams.videoQ = videoQ;
+
+      if ("z" in urlArgs) {
+        var v_ss = urlArgs.z.split(",");
+        for (var i = 0; i < v_ss.length; i+=2) {
+          videoQ.add({v:v_ss[i], s:parseFloat(v_ss[i+1])});
+        }
+      }
+
+      function onDOMLoad() {
+        tryLoadYTIframeApi();
+      }
+      document.addEventListener("DOMContentLoaded", onDOMLoad);
+    </script>
+  </body>
+</html>
