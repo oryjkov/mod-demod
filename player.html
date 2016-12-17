@@ -1,19 +1,12 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <style>
-      .stuff {
-        opacity: 0.5;
-        position: absolute;
-        z-index: 2147483647;
-      }
-    </style>
-  </head>
   <body>
     <div id='bufQ'></div>
     <div id='players'></div>
 
     <script type="text/javascript" src="demodulate.js"></script>
+    <script type="text/javascript" src="player.js"></script>
+    <script type="text/javascript" src="video_q.js"></script>
     <script>
        "use strict";
        var urlArgs = function() {
@@ -31,49 +24,13 @@
        if ("numPlayers" in urlArgs) {
          numPlayers = urlArgs["numPlayers"];
        }
+      playerParams.numPlayers = numPlayers;
+      playerParams.playersDiv = document.getElementById('players')
 
-      class VideoQ {
-        constructor(canvas) {
-          this.size = 100;
-          this.q = [];
-          this.canvas = canvas;
-          this.updateProgress();
-        }
-        updateProgress() {
-          var canvasLength = 1800;
-          var canvasHeight = 25;
-          if (this.canvas == null) {
-            return;
-          }
-          this.canvas.clearRect(0, 0, canvasLength, canvasHeight);
-          this.canvas.fillStyle = "green";
-          var progress = this.q.length / this.size;
-
-          this.canvas.fillRect(0, 0, canvasLength * progress, canvasHeight);
-          this.canvas.font="14px Georgia";
-          this.canvas.fillStyle = "black";
-          this.canvas.fillText((this.q.length).toFixed(0), canvasLength * progress / 2, 12);
-        }
-        add(v) {
-          if (this.q.length <= this.size) {
-            this.q.push(v);
-          }
-          this.updateProgress();
-        }
-        tryGet() {
-          this.updateProgress();
-          if (this.q.length > 0) {
-            return this.q.shift();
-          } else {
-            return null;
-          }
-        }
-      }
       var qCanvas = document.createElement("canvas");
       document.getElementById("bufQ").appendChild(qCanvas);
-      qCanvas.width = window.innerWidth * 0.9;
-      qCanvas.height = 25;
       var videoQ = new VideoQ(qCanvas.getContext("2d"));
+      playerParams.videoQ = videoQ;
 
       function onReceive(recvPayload) {
         try {
@@ -109,116 +66,6 @@
 
       document.addEventListener("DOMContentLoaded", onDOMLoad);
 
-      // Player registry.
-      var myPlayers = {};
-      function getPlayerFromEvent(event) {
-        return myPlayers[event.target.getIframe().id];
-      }
-
-      function onPlayerReady(event) {
-        var that = getPlayerFromEvent(event);
-        window.setInterval(function() { that.watchDog(); }, 1000);
-      }
-
-      function onPlayerError(event) {
-        var that = getPlayerFromEvent(event);
-        // Ignore all errors and move on
-        that.lastPlaybackScheduleTimeMs = 0;
-        console.log("restarting on error");
-      }
-
-      class MyPlayer {
-        constructor(playerElement, infoBox) {
-          this.currentVideoDurationSec = 0;
-          this.toleranceTimeSec = 5;
-          this.lastPlaybackScheduleTimeMs = 0;
-          this.infoBox = infoBox
-          this.infoBox.textContent = 'no video';
-
-          this.player_ = new YT.Player(playerElement.id, {
-            width: '640',
-            height: '480',
-            playerVars: {
-              'showinfo': '0',
-              'modestbranding': '1',
-              'controls': '0',
-              'rel': '0',
-            },
-            events: {
-              'onReady': onPlayerReady,
-              'onError': onPlayerError
-            }
-          });
-        }
-
-        watchDog() {
-          var secSinceLastPlayback = (Date.now() - this.lastPlaybackScheduleTimeMs) / 1000;
-          var alarmTimeSec = this.currentVideoDurationSec + this.toleranceTimeSec;
-          if (secSinceLastPlayback > alarmTimeSec) {
-            this.maybeNextVideo();
-            return;
-          }
-          // Restart if not playing or buffering.
-          if (this.player_.getPlayerState() == 1 || this.player_.getPlayerState() == 3) { return; }
-          if (secSinceLastPlayback > this.toleranceTimeSec) {
-            this.maybeNextVideo();
-            return;
-          }
-          if (this.player_.getPlayerState() != 1) {
-            console.log(this.player_.getPlayerState());
-          }
-        }
-
-        maybeNextVideo() {
-          var v = videoQ.tryGet();
-          if (this.player_.getPlayerState() == 1 || this.player_.getPlayerState() == 3) { return; }
-          if (v == null) {
-            // Try again.
-            this.lastPlaybackScheduleTimeMs = 0;
-            return;
-          }
-          this.currentVideoDurationSec = v.e - v.s;
-
-          this.player_.loadVideoById(
-              {'videoId': v.v,
-               'startSeconds': v.s,
-               'endSeconds': v.s + 30});
-          this.player_.mute();
-          this.lastPlaybackScheduleTimeMs = Date.now();
-          this.infoBox.textContent = JSON.stringify(v);
-        }
-      }
-      function tryLoadYTIframeApi() {
-        if (!navigator.onLine) {
-          setTimeout(tryLoadYTIframeApi, 1000);
-        }
-
-        var tag = document.createElement('script');
-        tag.src = 'https://www.youtube.com/iframe_api';
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-      }
-
-      function onYouTubeIframeAPIReady() {
-        for (var i = 0; i < numPlayers; ++i) {
-          console.log('setting up player ', i);
-          var div = document.createElement('span');
-          div.style.display='inline-block';
-          document.getElementById('players').appendChild(div); 
-
-          var playerDiv = document.createElement('div');
-          var infoDiv = document.createElement('div');
-          infoDiv.style.width = '640px';
-          infoDiv.style.height = '60px';
-          infoDiv.style.display = 'block';
-
-          div.appendChild(playerDiv);
-          div.appendChild(infoDiv);
-
-          playerDiv.id = 'player' + i;
-          myPlayers[playerDiv.id] = new MyPlayer(playerDiv, infoDiv)
-        }
-      }
     </script>
   </body>
 </html>
